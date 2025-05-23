@@ -2,25 +2,39 @@ import prisma from "../prismaClient.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export async function login(req, res, next) {
+// … função login já existente …
+
+// POST /api/auth/register
+export async function register(req, res, next) {
   try {
-    const { email, senha } = req.body;
-    const usuario = await prisma.usuario.findUnique({ where: { email } });
-    if (!usuario) {
-      return res.status(401).json({ error: "Credenciais inválidas" });
+    const { nome, email, senha } = req.body;
+
+    // 1) Verifica se já existe usuário com esse e-mail
+    const existing = await prisma.usuario.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(409).json({ error: "E-mail já cadastrado." });
     }
 
-    const senhaValida = await bcrypt.compare(senha, usuario.senha);
-    if (!senhaValida) {
-      return res.status(401).json({ error: "Credenciais inválidas" });
-    }
+    // 2) Gera hash da senha
+    const hash = await bcrypt.hash(senha, 10);
 
-    const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, nome: usuario.nome },
-      process.env.JWT_SECRET,
-      { expiresIn: "8h" }
-    );
-    res.json({ token });
+    // 3) Cria o usuário no banco (papel padrão “OPERADOR”)
+    const novoUsuario = await prisma.usuario.create({
+      data: {
+        nome,
+        email,
+        senha: hash,
+        papel: "OPERADOR",
+      },
+    });
+
+    // 4) Retorna dados básicos (sem a senha)
+    return res.status(201).json({
+      id: novoUsuario.id,
+      nome: novoUsuario.nome,
+      email: novoUsuario.email,
+      papel: novoUsuario.papel,
+    });
   } catch (err) {
     next(err);
   }
