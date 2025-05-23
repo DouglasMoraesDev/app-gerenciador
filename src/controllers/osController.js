@@ -1,5 +1,5 @@
 // src/controllers/osController.js
-import OsModel from '../models/OsModel.js'; // ajuste para o seu model real
+import OsModel from '@prisma/client'; // ajuste para o seu model real
 
 // Listar todas as OS
 export async function getTodasOS(req, res) {
