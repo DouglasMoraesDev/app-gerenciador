@@ -1,50 +1,61 @@
-import prisma from "../prismaClient.js";
+// src/controllers/clientesController.js
 
-async function getTodas() {
-  return prisma.ordemServico.findMany({
-    include: { cliente: true }
-  });
+import clientesService from "../services/clientesService.js";
+
+// GET /api/clientes
+export async function getTodosClientes(req, res, next) {
+  try {
+    const lista = await clientesService.getTodos();
+    res.json(lista);
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function getPorId(id) {
-  return prisma.ordemServico.findUnique({
-    where: { id },
-    include: { cliente: true }
-  });
+// GET /api/clientes/:id
+export async function getClienteById(req, res, next) {
+  try {
+    const { id } = req.params;
+    const cliente = await clientesService.getPorId(Number(id));
+    if (!cliente) {
+      return res.status(404).json({ error: "Cliente não encontrado" });
+    }
+    res.json(cliente);
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function criar(dados) {
-  return prisma.ordemServico.create({
-    data: {
-      descricao: dados.descricao,
-      status: dados.status || "PENDENTE",
-      valorTotal: dados.valorTotal,
-      cliente: { connect: { id: dados.clienteId } }
-    },
-    include: { cliente: true }
-  });
+// POST /api/clientes
+export async function criarCliente(req, res, next) {
+  try {
+    const dados = req.body;
+    const novoCli = await clientesService.criar(dados);
+    res.status(201).json(novoCli);
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function atualizar(id, dados) {
-  return prisma.ordemServico.update({
-    where: { id },
-    data: {
-      descricao: dados.descricao,
-      status: dados.status,
-      valorTotal: dados.valorTotal
-    },
-    include: { cliente: true }
-  });
+// PUT /api/clientes/:id
+export async function atualizarCliente(req, res, next) {
+  try {
+    const { id } = req.params;
+    const dados = req.body;
+    const cliAtualizado = await clientesService.atualizar(Number(id), dados);
+    res.json(cliAtualizado);
+  } catch (err) {
+    next(err);
+  }
 }
 
-async function deletar(id) {
-  return prisma.ordemServico.delete({ where: { id } });
+// DELETE /api/clientes/:id
+export async function deletarCliente(req, res, next) {
+  try {
+    const { id } = req.params;
+    await clientesService.deletar(Number(id));
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
 }
-
-export default {
-  getTodas,
-  getPorId,
-  criar,
-  atualizar,
-  deletar
-};

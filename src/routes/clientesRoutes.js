@@ -1,3 +1,5 @@
+// src/routes/clientesRoutes.js
+
 import { Router } from "express";
 import {
   getTodosClientes,
