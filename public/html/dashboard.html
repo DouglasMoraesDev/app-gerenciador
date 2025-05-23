@@ -15,8 +15,12 @@
         <li><a href="/dashboard.html">Home</a></li>
         <li><a href="/os.html">Ordens de Serviço</a></li>
         <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="/cadastro-cliente.html">Cadastrar cliente</a></li>
         <li><a href="/clientes.html">Clientes</a></li>
+        <li><a href="/auditoria.html"></a></li>
+        <li><a href="/estoque.html"></a></li>
         <li><a href="/login.html" id="logout-btn">Sair</a></li>
+        
       </ul>
     </nav>
   </header>
@@ -41,15 +45,19 @@
   </footer>
 
   <!-- script principal como módulo -->
-  <script type="module">
-    import { getUserNameFromToken } from '/js/main.js';
-    const name = getUserNameFromToken();
-    if (!name) {
-      // sem token: mostra link e não tenta preencher nome
+<script>
+  // Pega token e decodifica payload
+  const token = localStorage.getItem('token');
+  if (!token) {
+    document.getElementById('login-link').style.display = 'block';
+  } else {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      document.getElementById('user-name').textContent = payload.nome || 'Usuário';
+    } catch {
       document.getElementById('login-link').style.display = 'block';
-    } else {
-      document.getElementById('user-name').textContent = name;
     }
-  </script>
+  }
+</script>
 </body>
 </html>

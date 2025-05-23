@@ -75,6 +75,86 @@ nav ul li a:hover {
   padding: 0 20px;
 }
 
+/* Barra de busca */
+.search-wrapper {
+  margin: 20px 0 10px;
+  text-align: right;
+}
+
+.search-wrapper input {
+  width: 100%;
+  max-width: 300px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+/* Table wrapper */
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 10px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* Tabelas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+th {
+  background-color: #007bff;
+  color: #fff;
+  font-weight: 600;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Largura de colunas específicas */
+#clientes-table th:nth-child(1),
+#os-table th:nth-child(1) {
+  width: 5%;
+}
+
+#clientes-table th:nth-child(2),
+#os-table th:nth-child(2) {
+  width: 20%;
+}
+
+#clientes-table th:nth-child(3),
+#os-table th:nth-child(3) {
+  width: 15%;
+}
+
+#clientes-table th:nth-child(4),
+#os-table th:nth-child(4) {
+  width: 20%;
+}
+
+/* Botões de ação na tabela */
+table button {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  margin-right: 5px;
+}
+
 /* Cards (OS e Clientes) */
 .cards-container {
   display: grid;
@@ -129,7 +209,7 @@ textarea {
   font-size: 1rem;
 }
 
-/* Botões */
+/* Botões gerais */
 button {
   padding: 10px 20px;
   border: none;
@@ -151,6 +231,7 @@ footer {
   color: #fff;
   padding: 10px 20px;
   text-align: center;
+  font-size: 0.9rem;
 }
 
 /* Responsivo */
@@ -168,6 +249,7 @@ footer {
     display: none;
     flex-direction: column;
     align-items: center;
+    z-index: 10;
   }
   nav.open {
     display: flex;
@@ -187,17 +269,21 @@ footer {
   header h1 {
     font-size: 1rem;
   }
-  footer p {
-    font-size: 0.9rem;
+  footer {
+    font-size: 0.8rem;
   }
 
-  /* Cards em coluna única */
+  /* Esconde tabelas e exibe cards */
+  .table-wrapper {
+    display: none;
+  }
   .cards-container {
     grid-template-columns: 1fr;
   }
 }
+
 @media (min-width: 769px) {
-  /* Cards em duas colunas */
+  /* Cards em duas colunas no desktop */
   .cards-container {
     grid-template-columns: repeat(2, 1fr);
   }
