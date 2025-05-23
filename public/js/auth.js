@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const { token } = await loginUser(email, senha);
       localStorage.setItem("token", token);
-      window.location.href = "https://app-gerenciador-production.up.railway.app/dashboard.html";
+      window.location.href = "/dashboard.html";
+
     } catch (err) {
       errorMsg.textContent = err.message;
       errorMsg.style.display = "block";

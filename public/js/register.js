@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       await registerUser({ nome, email, senha });
-      window.location.href = "https://app-gerenciador-production.up.railway.app/login.html";
+      window.location.href = "/login.html";
+
     } catch (err) {
       msgEl.textContent = err.message;
       msgEl.style.display = "block";

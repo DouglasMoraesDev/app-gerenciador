@@ -9,6 +9,8 @@ import osRoutes from "./routes/osRoutes.js";
 import caixaRoutes from "./routes/caixaRoutes.js";
 import clientesRoutes from "./routes/clientesRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import estoqueRoutes from './routes/estoqueRoutes.js';
+import auditoriaRoutes from './routes/auditoriaRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -59,6 +61,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/os", osRoutes);
 app.use("/api/caixa", caixaRoutes);
 app.use("/api/clientes", clientesRoutes);
+
+app.use('/api/estoque', estoqueRoutes);
+app.use('/api/auditoria', auditoriaRoutes);
 
 // Tratamento de erro
 app.use(errorHandler);

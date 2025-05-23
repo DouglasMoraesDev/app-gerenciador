@@ -12,6 +12,14 @@ async function getTodas() {
   });
 }
 
+
+export async function changeStatus(id, status) {
+  return prisma.os.update({
+    where: { id },
+    data: { status }
+  });
+}
+
 /**
  * Retorna uma ordem de serviço pelo seu ID,
  * incluindo os dados do cliente relacionado.
