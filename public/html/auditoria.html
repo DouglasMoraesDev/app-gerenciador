@@ -1,19 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>…</head>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Auditoria - ADM Lava-Rápido</title>
+  <link rel="stylesheet" href="/css/styles.css"/>
+</head>
 <body>
-  <header>…</header>
+  <header>
+    <h1>Auditoria</h1>
+   <button class="menu-btn" id="menu-btn">☰</button>
+      <nav id="main-nav">
+        <ul>
+          <li><a href="/dashboard.html">Home</a></li>
+          <li><a href="/os-list.html">Ordens do Dia</a></li>
+          <li><a href="/criar-os.html">Criar Ordem</a></li>
+          <li><a href="/caixa.html">Caixa</a></li>
+          <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+          <li><a href="/clientes.html">Clientes</a></li>
+          <li><a href="/auditoria.html">Auditoria</a></li>
+          <li><a href="/estoque.html">Estoque</a></li>
+          <li><a href="/login.html" id="logout-btn">Sair</a></li>
+        </ul>
+      </nav>
+
+  </header>
+
+  <script>
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('open');
+    });
+  </script>
+    </body>
+  </header>
+
   <div class="container">
+
     <h2>Auditoria</h2>
     <div class="form-group">
       <label for="mes">Selecione o mês</label>
-      <input type="month" id="mes"/>
+      <input type="month" id="mes" required />
     </div>
     <button id="btn-auditar">Gerar Relatório</button>
     <div id="relatorio"></div>
   </div>
+
   <footer>…</footer>
   <script type="module" src="/js/auditoria.js"></script>
+
+    <footer>
+    <p>&copy; 2025 Lava-Rápido</p>
+  </footer>
 </body>
 </html>
-   

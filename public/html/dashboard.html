@@ -3,26 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Lava-Rápido Manager</title>
+  <title>Dashboard - ADM Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <header>
-    <h1>Lava-Rápido Manager</h1>
+    <h1>Lava-Rápido</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
-    <nav id="main-nav">
-      <ul>
-        <li><a href="/dashboard.html">Home</a></li>
-        <li><a href="/os.html">Ordens de Serviço</a></li>
-        <li><a href="/caixa.html">Caixa</a></li>
-        <li><a href="/cadastro-cliente.html">Cadastrar cliente</a></li>
-        <li><a href="/clientes.html">Clientes</a></li>
-        <li><a href="/auditoria.html"></a></li>
-        <li><a href="/estoque.html"></a></li>
-        <li><a href="/login.html" id="logout-btn">Sair</a></li>
-        
-      </ul>
-    </nav>
+      <nav id="main-nav">
+        <ul>
+          <li><a href="/dashboard.html">Home</a></li>
+          <li><a href="/os-list.html">Ordens do Dia</a></li>
+          <li><a href="/criar-os.html">Criar Ordem</a></li>
+          <li><a href="/caixa.html">Caixa</a></li>
+          <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+          <li><a href="/clientes.html">Clientes</a></li>
+          <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+          <li><a href="/auditoria.html">Auditoria</a></li>
+          <li><a href="/estoque.html">Estoque</a></li>
+          <li><a href="/login.html" id="logout-btn">Sair</a></li>
+        </ul>
+      </nav>
+
   </header>
 
   <script>
@@ -41,23 +43,22 @@
   </div>
 
   <footer>
-    <p>&copy; 2025 Lava-Rápido Manager</p>
+    <p>&copy; 2025 Lava-Rápido</p>
   </footer>
 
-  <!-- script principal como módulo -->
-<script>
-  // Pega token e decodifica payload
-  const token = localStorage.getItem('token');
-  if (!token) {
-    document.getElementById('login-link').style.display = 'block';
-  } else {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      document.getElementById('user-name').textContent = payload.nome || 'Usuário';
-    } catch {
+  <script>
+    // Pega token e decodifica payload
+    const token = localStorage.getItem('token');
+    if (!token) {
       document.getElementById('login-link').style.display = 'block';
+    } else {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        document.getElementById('user-name').textContent = payload.nome || 'Usuário';
+      } catch {
+        document.getElementById('login-link').style.display = 'block';
+      }
     }
-  }
-</script>
+  </script>
 </body>
 </html>

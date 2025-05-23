@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clientes - ADMLava-Rápido</title>
+  <title>Ordens do Dia - Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <header>
-    <h1>Clientes</h1>
+    <h1>Ordens de Serviço do Dia</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
       <nav id="main-nav">
         <ul>
@@ -32,17 +32,28 @@
   </script>
 
   <div class="container">
-    <form id="cliente-form">
-      <!-- seus inputs aqui -->
-    </form>
+    <div class="filter-group">
+      <label for="filtroStatus">Filtrar por Status:</label>
+      <select id="filtroStatus">
+        <option value="">Todos</option>
+        <option value="PENDENTE">Pendente</option>
+        <option value="EM_ANDAMENTO">Em Andamento</option>
+        <option value="PRONTO">Pronto</option>
+        <option value="ENTREGUE">Entregue</option>
+      </select>
+    </div>
 
-    <!-- **Tabela** que o clientes.js espera -->
     <div class="table-wrapper">
-      <table id="clientes-table">
+      <table id="os-table">
         <thead>
           <tr>
-            <th>ID</th><th>Nome</th><th>Telefone</th><th>E-mail</th>
-            <th>Veículo</th><th>Placa</th><th>Criado Em</th><th>Ações</th>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Descrição</th>
+            <th>Status</th>
+            <th>Valor</th>
+            <th>Criada Em</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -51,9 +62,9 @@
   </div>
 
   <footer>
-    <p>&copy; 2025 Lava-Rápido</p>
+    <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
 
-  <script type="module" src="/js/clientes.js"></script>
+  <script type="module" src="/js/os-list.js"></script>
 </body>
 </html>

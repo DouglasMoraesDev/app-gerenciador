@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Empresas Parceiras - Lava-Rápido Manager</title>
+  <link rel="stylesheet" href="/css/styles.css"/>
+</head>
+<body>
+  <header>
+    <h1>Empresas Parceiras</h1>
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <nav id="main-nav">
+      <ul>
+        <li><a href="/dashboard.html">Home</a></li>
+        <li><a href="/os-list.html">Ordens do Dia</a></li>
+        <li><a href="/criar-os.html">Criar OS</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+        <li><a href="/clientes.html">Clientes</a></li>
+        <li><a href="/auditoria.html">Auditoria</a></li>
+        <li><a href="/estoque.html">Estoque</a></li>
+        <li><a href="/empresa-parceira.html" class="active">Parceiras</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <script>
+    document.getElementById('menu-btn')
+      .addEventListener('click', () => document.getElementById('main-nav').classList.toggle('open'));
+  </script>
+
+  <div class="container">
+    <section class="form-section">
+      <h2>Cadastrar Empresa Parceira</h2>
+      <form id="empresa-form" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="nome">Nome da Empresa</label>
+          <input type="text" id="nome" name="nome" required />
+        </div>
+        <div class="form-group">
+          <label for="cnpj">CNPJ</label>
+          <input type="text" id="cnpj" name="cnpj" pattern="\d{14}" placeholder="Somente números" required/>
+        </div>
+        <div class="form-group">
+          <label for="descricao">Descrição do Serviço</label>
+          <textarea id="descricao" name="descricao" rows="3" required></textarea>
+        </div>
+        <div class="form-group">
+          <label for="valorMensal">Valor Mensal (R$)</label>
+          <input type="number" id="valorMensal" name="valorMensal" step="0.01" required/>
+        </div>
+        <div class="form-group">
+          <label for="contrato">Contrato (PDF)</label>
+          <input type="file" id="contrato" name="contrato" accept="application/pdf" required/>
+        </div>
+        <button type="submit">Salvar Parceira</button>
+      </form>
+    </section>
+
+    <section class="table-section">
+      <h2>Lista de Parceiras</h2>
+      <div class="table-wrapper">
+        <table id="empresa-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>CNPJ</th>
+              <th>Serviço</th>
+              <th>Valor Mensal</th>
+              <th>Contrato</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Lava-Rápido Manager</p>
+  </footer>
+
+  <script type="module" src="/js/empresa-parceira.js"></script>
+</body>
+</html>

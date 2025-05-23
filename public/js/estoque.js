@@ -1,10 +1,10 @@
-import {
-  BASE_URL
-} from "./api.js";
+import { BASE_URL } from "./api.js";
 
-// CRUD de produtos de estoque
 const form = document.getElementById("produto-form");
 const tbody = document.querySelector("#estoque-table tbody");
+const inputSearch = document.getElementById("search-estoque");
+
+let estoqueList = [];      // guarda todos os produtos para filtro
 
 async function fetchEstoque() {
   const resp = await fetch(`${BASE_URL}/api/estoque`, {
@@ -30,13 +30,23 @@ function renderEstoque(list) {
   });
 }
 
+// filtra pelo nome do produto
+inputSearch.addEventListener("input", () => {
+  const term = inputSearch.value.trim().toLowerCase();
+  const filtered = estoqueList.filter(p =>
+    p.nome.toLowerCase().includes(term)
+  );
+  renderEstoque(filtered);
+});
+
 window.editProd = async id => {
-  const p = await (await fetch(`${BASE_URL}/api/estoque/${id}`,{
-    headers:{Authorization:`Bearer ${localStorage.getItem("token")}`}
-  })).json();
-  document.getElementById("nomeProd").value = p.nome;
-  document.getElementById("quantidade").value = p.quantidade;
-  document.getElementById("validade").value = p.validade?.split("T")[0] || "";
+  const resp = await fetch(`${BASE_URL}/api/estoque/${id}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+  });
+  const p = await resp.json();
+  form.nome.value = p.nome;
+  form.quantidade.value = p.quantidade;
+  form.validade.value = p.validade?.split("T")[0] || "";
   form.dataset.editId = id;
 };
 
@@ -44,34 +54,35 @@ window.delProd = async id => {
   if (!confirm("Excluir produto?")) return;
   await fetch(`${BASE_URL}/api/estoque/${id}`, {
     method: "DELETE",
-    headers: { Authorization:`Bearer ${localStorage.getItem("token")}` }
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
   });
-  load();
+  await load();
 };
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
   const dados = {
-    nome: document.getElementById("nomeProd").value,
-    quantidade: +document.getElementById("quantidade").value,
-    validade: document.getElementById("validade").value || null
+    nome: form.nome.value.trim(),
+    quantidade: Number(form.quantidade.value),
+    validade: form.validade.value || null
   };
   const id = form.dataset.editId;
-  await fetch(`${BASE_URL}/api/estoque${id?"/"+id:""}`, {
+  await fetch(`${BASE_URL}/api/estoque${id ? "/" + id : ""}`, {
     method: id ? "PUT" : "POST",
-    headers:{
-      "Content-Type":"application/json",
-      Authorization:`Bearer ${localStorage.getItem("token")}`
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`
     },
     body: JSON.stringify(dados)
   });
   form.reset();
   delete form.dataset.editId;
-  load();
+  await load();
 });
 
 async function load() {
-  const list = await fetchEstoque();
-  renderEstoque(list);
+  estoqueList = await fetchEstoque();
+  renderEstoque(estoqueList);
 }
+
 load();

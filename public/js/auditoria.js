@@ -1,16 +1,37 @@
 import { BASE_URL } from "./api.js";
 
-document.getElementById("btn-auditar").addEventListener("click", async () => {
-  const mes = document.getElementById("mes").value; // e.g. "2025-05"
+const btn = document.getElementById("btn-auditar");
+const inputMes = document.getElementById("mes");
+const container = document.getElementById("relatorio");
+
+btn.addEventListener("click", async () => {
+  container.innerHTML = ""; // limpa antes
+  const mes = inputMes.value;
+  if (!mes) {
+    alert("Selecione um mês.");
+    return;
+  }
+
   const resp = await fetch(`${BASE_URL}/api/auditoria?mes=${mes}`, {
-    headers:{ Authorization:`Bearer ${localStorage.getItem("token")}` }
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
   });
+
+  if (resp.status === 401) {
+    alert("Sessão expirada ou não autorizada. Faça login novamente.");
+    window.location.href = "/login.html";
+    return;
+  }
+
+  if (!resp.ok) {
+    container.innerHTML = `<p>Erro ao gerar relatório: ${resp.statusText}</p>`;
+    return;
+  }
+
   const data = await resp.json();
-  document.getElementById("relatorio").innerHTML = `
-    <h3>${mes}</h3>
+  container.innerHTML = `
+    <h3>Relatório de ${mes}</h3>
     <p>Entradas: R$ ${data.entradas.toFixed(2)}</p>
     <p>Saídas: R$ ${data.saidas.toFixed(2)}</p>
-    <p>OS emitidas: ${data.osCount}</p>
-    …
+    <p>Ordens de Serviço emitidas: ${data.osCount}</p>
   `;
 });
