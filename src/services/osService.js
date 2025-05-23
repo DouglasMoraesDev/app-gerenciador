@@ -35,7 +35,8 @@ async function deletar(id) {
 }
 
 export default {
-  getTodos,
+  getTodas,
+  getPorId,
   criar,
   atualizar,
   deletar

@@ -47,4 +47,18 @@ async function fechar(id) {
 }
 
 // Retorna movimentações do dia (ex.: entradas/saídas)
-// Nesse exemplo, usamos apenas o próprio modelo Caixa como registro. Se quiser diferenciar entrada e saíd
+// Se você tiver um modelo separado de Movimentacao, aqui poderia buscar esses registros.
+// No momento, retorna array vazio para não quebrar.
+async function getMovimentacoes() {
+  const caixa = await getCaixaAberto();
+  if (!caixa) return [];
+  return [];
+}
+
+// Export padrão (default) contendo todos os métodos
+export default {
+  getCaixaAberto,
+  abrir,
+  fechar,
+  getMovimentacoes
+};

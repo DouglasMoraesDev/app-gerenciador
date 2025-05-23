@@ -37,4 +37,10 @@ async function deletar(id) {
   return prisma.cliente.delete({ where: { id } });
 }
 
-export default { getTodos, getPorId, criar, atualizar, deletar };
+export default {
+  getTodos,
+  getPorId,
+  criar,
+  atualizar,
+  deletar
+};

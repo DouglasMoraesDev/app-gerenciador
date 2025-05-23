@@ -1,8 +1,9 @@
+// src/controllers/caixaController.js
 import caixaService from "../services/caixaService.js";
 
 export async function getCaixaAtual(req, res, next) {
   try {
-    const usuarioId = req.usuario.id;
+    // usuário já foi extraído pelo authMiddleware (req.usuario.id), mas você não precisa disso aqui
     const caixa = await caixaService.getCaixaAberto();
     res.json(caixa || null);
   } catch (err) {

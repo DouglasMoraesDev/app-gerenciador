@@ -1,12 +1,13 @@
+// src/routes/authRoutes.js
 import { Router } from "express";
 import { login, register } from "../controllers/authController.js";
 
 const router = Router();
 
-// POST /api/auth/register  → cria novo usuário
+// Rota de cadastro
 router.post("/register", register);
 
-// POST /api/auth/login     → faz login e retorna JWT
+// Rota de login
 router.post("/login", login);
 
 export default router;
