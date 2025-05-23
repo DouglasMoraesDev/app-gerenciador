@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <!-- header+nav -->
   <header>
     <h1>Clientes</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
@@ -21,6 +20,7 @@
       </ul>
     </nav>
   </header>
+
   <script>
     document.getElementById('menu-btn').addEventListener('click', () => {
       document.getElementById('main-nav').classList.toggle('open');
@@ -29,36 +29,27 @@
 
   <div class="container">
     <form id="cliente-form">
-      <div class="form-group">
-        <label for="nome">Nome</label>
-        <input type="text" id="nome" name="nome" required />
-      </div>
-      <div class="form-group">
-        <label for="telefone">Telefone</label>
-        <input type="text" id="telefone" name="telefone" />
-      </div>
-      <div class="form-group">
-        <label for="email">E-mail</label>
-        <input type="email" id="email" name="email" />
-      </div>
-      <div class="form-group">
-        <label for="veiculo">Veículo</label>
-        <input type="text" id="veiculo" name="veiculo" required />
-      </div>
-      <div class="form-group">
-        <label for="placa">Placa</label>
-        <input type="text" id="placa" name="placa" required />
-      </div>
-      <button type="submit">Salvar Cliente</button>
+      <!-- seus inputs aqui -->
     </form>
 
-    <!-- Cards de clientes -->
-    <div id="clientes-cards" class="cards-container"></div>
+    <!-- **Tabela** que o clientes.js espera -->
+    <div class="table-wrapper">
+      <table id="clientes-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Nome</th><th>Telefone</th><th>E-mail</th>
+            <th>Veículo</th><th>Placa</th><th>Criado Em</th><th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
 
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
+
   <script type="module" src="/js/clientes.js"></script>
 </body>
 </html>

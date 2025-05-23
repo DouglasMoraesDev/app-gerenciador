@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <!-- header+nav -->
   <header>
     <h1>Lava-Rápido Manager</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
@@ -21,6 +20,7 @@
       </ul>
     </nav>
   </header>
+
   <script>
     document.getElementById('menu-btn').addEventListener('click', () => {
       document.getElementById('main-nav').classList.toggle('open');
@@ -30,15 +30,26 @@
   <div class="container">
     <h2>Bem-vindo, <span id="user-name"></span></h2>
     <p>Escolha uma opção no menu para começar.</p>
+    <!-- Caso alguém abra essa página sem token, mostramos link manual -->
+    <p id="login-link" style="margin-top:20px; display:none;">
+      Você não está logado. <a href="/login.html">Clique aqui para entrar</a>.
+    </p>
   </div>
 
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script>
-    // exibe nome e logout (do seu global JS)
+
+  <!-- script principal como módulo -->
+  <script type="module">
     import { getUserNameFromToken } from '/js/main.js';
-    document.getElementById('user-name').textContent = getUserNameFromToken() || 'Usuário';
+    const name = getUserNameFromToken();
+    if (!name) {
+      // sem token: mostra link e não tenta preencher nome
+      document.getElementById('login-link').style.display = 'block';
+    } else {
+      document.getElementById('user-name').textContent = name;
+    }
   </script>
 </body>
 </html>

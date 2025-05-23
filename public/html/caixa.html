@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
-  <!-- header+nav -->
   <header>
     <h1>Caixa</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
@@ -21,6 +20,7 @@
       </ul>
     </nav>
   </header>
+
   <script>
     document.getElementById('menu-btn').addEventListener('click', () => {
       document.getElementById('main-nav').classList.toggle('open');
@@ -32,8 +32,18 @@
       <button id="abrir-caixa-btn">Abrir Caixa</button>
       <button id="fechar-caixa-btn" disabled>Fechar Caixa</button>
     </div>
+
     <h3>Movimentações do Dia</h3>
-    <div id="mov-cards" class="cards-container"></div>
+    <!-- **Tabela** que o caixa.js espera -->
+    <div class="table-wrapper">
+      <table id="mov-table">
+        <thead>
+          <tr><th>Tipo</th><th>Valor</th><th>Data/Hora</th><th>Responsável</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
     <div id="saldo-atual" style="margin-top:20px;">
       <p>Saldo Atual: <strong id="saldo-valor">R$ 0,00</strong></p>
     </div>
@@ -42,6 +52,7 @@
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
+
   <script type="module" src="/js/caixa.js"></script>
 </body>
 </html>
