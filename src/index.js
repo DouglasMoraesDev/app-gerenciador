@@ -1,8 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import path from "path";
 
-import prisma from "./prismaClient.js";        // agora será usado
+import prisma from "./prismaClient.js";
 import authRoutes from "./routes/authRoutes.js";
 import osRoutes from "./routes/osRoutes.js";
 import caixaRoutes from "./routes/caixaRoutes.js";
@@ -12,30 +13,54 @@ import errorHandler from "./middlewares/errorHandler.js";
 dotenv.config();
 const app = express();
 
-app.use(cors());
+// Lista de origens permitidas
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://app-gerenciador-production.up.railway.app"
+];
+
+// Configura CORS para aceitar esses dois domínios
+app.use(cors({
+  origin: (origin, callback) => {
+    // permitir requisições sem origin (Postman, mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Bloqueado pelo CORS"));
+  },
+  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
+  credentials: true
+}));
+
+// Para responder corretamente ao preflight (OPTIONS)
+app.options("*", cors());
+
 app.use(express.json());
 
-// Health-check simples que testa a conexão ao banco
+// Health-check
 app.get("/health", async (req, res) => {
   try {
-    // Apenas uma consulta simples para verificar se o banco responde
     await prisma.$queryRaw`SELECT 1`;
     res.status(200).json({ status: "ok", db: "conectado" });
-  } catch (err) {
+  } catch {
     res.status(500).json({ status: "erro", db: "não conectado" });
   }
 });
 
-// Serve arquivos estáticos se necessário (ex.: fetch de ícones)
-app.use("/public", express.static("public"));
+// Serve estáticos
+app.use(express.static(path.join(process.cwd(), "public/html")));
+app.use("/css", express.static(path.join(process.cwd(), "public/css")));
+app.use("/js", express.static(path.join(process.cwd(), "public/js")));
 
-// Rotas
+// Rotas da API
 app.use("/api/auth", authRoutes);
 app.use("/api/os", osRoutes);
 app.use("/api/caixa", caixaRoutes);
 app.use("/api/clientes", clientesRoutes);
 
-// Middleware de tratamento de erros (sempre por último)
+// Tratamento de erro
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

@@ -4,45 +4,44 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Caixa - Lava-Rápido Manager</title>
-  <link rel="stylesheet" href="https://app-gerenciador-production.up.railway.app/public/css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
+  <!-- header+nav -->
   <header>
-    <nav>
+    <h1>Caixa</h1>
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <nav id="main-nav">
       <ul>
-        <li><a href="https://app-gerenciador-production.up.railway.app/dashboard.html">Home</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/os.html">Ordens de Serviço</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/caixa.html">Caixa</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/clientes.html">Clientes</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/login.html" id="logout-btn">Sair</a></li>
+        <li><a href="/dashboard.html">Home</a></li>
+        <li><a href="/os.html">Ordens de Serviço</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="/clientes.html">Clientes</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
       </ul>
     </nav>
   </header>
+  <script>
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('open');
+    });
+  </script>
+
   <div class="container">
-    <h2>Controle de Caixa</h2>
     <div id="caixa-actions">
       <button id="abrir-caixa-btn">Abrir Caixa</button>
       <button id="fechar-caixa-btn" disabled>Fechar Caixa</button>
     </div>
     <h3>Movimentações do Dia</h3>
-    <table id="mov-table">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Valor</th>
-          <th>Data/Hora</th>
-          <th>Responsável</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <div id="saldo-atual">
-      <p>Saldo Atual: <span id="saldo-valor">R$ 0,00</span></p>
+    <div id="mov-cards" class="cards-container"></div>
+    <div id="saldo-atual" style="margin-top:20px;">
+      <p>Saldo Atual: <strong id="saldo-valor">R$ 0,00</strong></p>
     </div>
   </div>
+
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script type="module" src="https://app-gerenciador-production.up.railway.app/public/js/caixa.js"></script>
+  <script type="module" src="/js/caixa.js"></script>
 </body>
 </html>

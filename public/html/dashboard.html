@@ -4,45 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard - Lava-Rápido Manager</title>
-  <link rel="stylesheet" href="https://app-gerenciador-production.up.railway.app/public/css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
+  <!-- header+nav -->
   <header>
-    <nav>
+    <h1>Lava-Rápido Manager</h1>
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <nav id="main-nav">
       <ul>
-        <li><a href="https://app-gerenciador-production.up.railway.app/dashboard.html">Home</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/os.html">Ordens de Serviço</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/caixa.html">Caixa</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/clientes.html">Clientes</a></li>
-        <li><a href="https://app-gerenciador-production.up.railway.app/login.html" id="logout-btn">Sair</a></li>
+        <li><a href="/dashboard.html">Home</a></li>
+        <li><a href="/os.html">Ordens de Serviço</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="/clientes.html">Clientes</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
       </ul>
     </nav>
   </header>
+  <script>
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('open');
+    });
+  </script>
+
   <div class="container">
     <h2>Bem-vindo, <span id="user-name"></span></h2>
     <p>Escolha uma opção no menu para começar.</p>
   </div>
+
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script type="module">
-    // Exibe o nome do usuário extraído do token (payload JWT)
-    const token = localStorage.getItem("token");
-    if (!token) {
-      window.location.href = "https://app-gerenciador-production.up.railway.app/login.html";
-    } else {
-      const payloadBase64 = token.split(".")[1];
-      const decoded = atob(payloadBase64);
-      const payload = JSON.parse(decoded);
-      document.getElementById("user-name").textContent = payload.nome || "Usuário";
-    }
-
-    // Logout
-    document.getElementById("logout-btn").addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("token");
-      window.location.href = "https://app-gerenciador-production.up.railway.app/login.html";
-    });
+  <script>
+    // exibe nome e logout (do seu global JS)
+    import { getUserNameFromToken } from '/js/main.js';
+    document.getElementById('user-name').textContent = getUserNameFromToken() || 'Usuário';
   </script>
 </body>
 </html>

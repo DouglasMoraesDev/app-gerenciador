@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Cadastro - Lava-Rápido Manager</title>
-  <link rel="stylesheet" href="https://app-gerenciador-production.up.railway.app/public/css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <header>
     <h1>Cadastro de Usuário</h1>
   </header>
+
   <div class="container">
     <form id="register-form">
       <div class="form-group">
@@ -25,13 +26,14 @@
         <input type="password" id="senha" name="senha" minlength="6" required />
       </div>
       <button type="submit">Cadastrar</button>
+      <p id="msg" style="color:red; margin-top:10px; display:none;"></p>
     </form>
-    <p id="msg" style="color: red; display: none;"></p>
-    <p>Já tem conta? <a href="https://app-gerenciador-production.up.railway.app/login.html">Faça login aqui</a>.</p>
+    <p style="margin-top:15px;">Já tem conta? <a href="/login.html">Faça login aqui</a>.</p>
   </div>
+
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script type="module" src="https://app-gerenciador-production.up.railway.app/public/js/register.js"></script>
+  <script type="module" src="/js/register.js"></script>
 </body>
 </html>

@@ -4,12 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Lava-Rápido Manager</title>
-  <link rel="stylesheet" href="https://app-gerenciador-production.up.railway.app/public/css/styles.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <header>
     <h1>Login</h1>
   </header>
+
   <div class="container">
     <form id="login-form">
       <div class="form-group">
@@ -21,13 +22,14 @@
         <input type="password" id="senha" name="senha" required />
       </div>
       <button type="submit">Entrar</button>
+      <p id="error-msg" style="color:red; margin-top:10px; display:none;"></p>
     </form>
-    <p id="error-msg" style="color: red; display: none;"></p>
-    <p>Não tem conta? <a href="https://app-gerenciador-production.up.railway.app/register.html">Cadastre-se aqui</a>.</p>
+    <p style="margin-top:15px;">Não tem conta? <a href="/register.html">Cadastre-se aqui</a>.</p>
   </div>
+
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script type="module" src="https://app-gerenciador-production.up.railway.app/public/js/auth.js"></script>
+  <script type="module" src="/js/auth.js"></script>
 </body>
 </html>
