@@ -1,0 +1,66 @@
+// Definição da fonte de dados (MySQL) e geração do cliente Prisma.
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ----------------------
+// Modelos principais:
+// ----------------------
+
+model Usuario {
+  id         Int          @id @default(autoincrement())
+  nome       String
+  email      String       @unique
+  senha      String
+  papel      String       // ADMIN, OPERADOR, MECANICO, etc.
+  criadoEm   DateTime     @default(now())
+  
+  // Relacionamento com Caixa (quem registrou)
+  caixas     Caixa[]      @relation("UsuarioCaixas")
+}
+
+model Cliente {
+  id         Int            @id @default(autoincrement())
+  nome       String
+  telefone   String?
+  email      String?
+  veiculo    String
+  placa      String         @unique
+  criadoEm   DateTime       @default(now())
+
+  // Histórico de Ordens de Serviço
+  ordens     OrdemServico[]
+}
+
+model OrdemServico {
+  id             Int       @id @default(autoincrement())
+  descricao      String
+  status         String    @default("PENDENTE") // PENDENTE, EM_ANDAMENTO, PRONTO, ENTREGUE
+  valorTotal     Float
+  criadoEm       DateTime  @default(now())
+  atualizadoEm   DateTime  @updatedAt
+  
+  // Relação com Cliente
+  cliente        Cliente   @relation(fields: [clienteId], references: [id])
+  clienteId      Int
+}
+
+model Caixa {
+  id              Int       @id @default(autoincrement())
+  dataAbertura    DateTime
+  dataFechamento  DateTime?
+  saldoInicial    Float
+  saldoFinal      Float?
+  entradas        Float     @default(0)
+  saidas          Float     @default(0)
+
+  // Quem abriu/fechou o caixa
+  usuario         Usuario   @relation("UsuarioCaixas", fields: [usuarioId], references: [id])
+  usuarioId       Int
+}
