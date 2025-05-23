@@ -1,7 +1,11 @@
 // public/js/api.js
 
-// Base URL do backend (Railway)
-export const BASE_URL = "https://app-gerenciador-production.up.railway.app";
+// Detecta se estamos em ambiente de desenvolvimento (localhost) ou produção
+const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+export const BASE_URL = IS_LOCAL
+  ? "http://localhost:3000"                              // API local em dev
+  : "https://app-gerenciador-production.up.railway.app";  // API no Railway em prod
 
 // ================================
 // AUTENTICAÇÃO
