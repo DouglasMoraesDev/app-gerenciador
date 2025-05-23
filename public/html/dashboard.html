@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard - Lava-Rápido Manager</title>
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="https://app-gerenciador-production.up.railway.app/public/css/styles.css" />
 </head>
 <body>
   <header>
     <nav>
       <ul>
-        <li><a href="dashboard.html">Home</a></li>
-        <li><a href="os.html">Ordens de Serviço</a></li>
-        <li><a href="caixa.html">Caixa</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
-        <li><a href="#" id="logout-btn">Sair</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/dashboard.html">Home</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/os.html">Ordens de Serviço</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/caixa.html">Caixa</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/clientes.html">Clientes</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/login.html" id="logout-btn">Sair</a></li>
       </ul>
     </nav>
   </header>
@@ -26,6 +25,24 @@
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script src="../js/main.js"></script>
+  <script type="module">
+    // Exibe o nome do usuário extraído do token (payload JWT)
+    const token = localStorage.getItem("token");
+    if (!token) {
+      window.location.href = "https://app-gerenciador-production.up.railway.app/login.html";
+    } else {
+      const payloadBase64 = token.split(".")[1];
+      const decoded = atob(payloadBase64);
+      const payload = JSON.parse(decoded);
+      document.getElementById("user-name").textContent = payload.nome || "Usuário";
+    }
+
+    // Logout
+    document.getElementById("logout-btn").addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("token");
+      window.location.href = "https://app-gerenciador-production.up.railway.app/login.html";
+    });
+  </script>
 </body>
 </html>

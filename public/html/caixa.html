@@ -1,32 +1,29 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Caixa - Lava-Rápido Manager</title>
-  <link rel="stylesheet" href="../css/styles.css">
-  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="https://app-gerenciador-production.up.railway.app/public/css/styles.css" />
 </head>
 <body>
   <header>
     <nav>
       <ul>
-        <li><a href="dashboard.html">Home</a></li>
-        <li><a href="os.html">Ordens de Serviço</a></li>
-        <li><a href="caixa.html">Caixa</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
-        <li><a href="#" id="logout-btn">Sair</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/dashboard.html">Home</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/os.html">Ordens de Serviço</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/caixa.html">Caixa</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/clientes.html">Clientes</a></li>
+        <li><a href="https://app-gerenciador-production.up.railway.app/login.html" id="logout-btn">Sair</a></li>
       </ul>
     </nav>
   </header>
   <div class="container">
     <h2>Controle de Caixa</h2>
-
     <div id="caixa-actions">
       <button id="abrir-caixa-btn">Abrir Caixa</button>
       <button id="fechar-caixa-btn" disabled>Fechar Caixa</button>
     </div>
-
     <h3>Movimentações do Dia</h3>
     <table id="mov-table">
       <thead>
@@ -37,11 +34,8 @@
           <th>Responsável</th>
         </tr>
       </thead>
-      <tbody>
-        <!-- Linhas de movimentações serão inseridas via JS -->
-      </tbody>
+      <tbody></tbody>
     </table>
-
     <div id="saldo-atual">
       <p>Saldo Atual: <span id="saldo-valor">R$ 0,00</span></p>
     </div>
@@ -49,6 +43,6 @@
   <footer>
     <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
-  <script src="../js/caixa.js"></script>
+  <script type="module" src="https://app-gerenciador-production.up.railway.app/public/js/caixa.js"></script>
 </body>
 </html>

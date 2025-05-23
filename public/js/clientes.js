@@ -1,19 +1,19 @@
-// CRUD de Clientes
+// public/js/clientes.js
 
-async function fetchClientes() {
-  const token = localStorage.getItem("token");
-  const response = await fetch("/api/clientes", {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!response.ok) throw new Error("Não foi possível carregar clientes");
-  return response.json();
-}
+import {
+  getClientes,
+  getClienteById,
+  criarCliente,
+  atualizarCliente,
+  excluirCliente,
+  BASE_URL,
+} from "./api.js";
 
 async function renderClientesTable() {
   const tbody = document.querySelector("#clientes-table tbody");
   tbody.innerHTML = "";
   try {
-    const clientes = await fetchClientes();
+    const clientes = await getClientes();
     clientes.forEach((cli) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -38,7 +38,6 @@ async function renderClientesTable() {
 
 async function createOrUpdateCliente(e) {
   e.preventDefault();
-  const token = localStorage.getItem("token");
   const nome = document.getElementById("nome").value;
   const telefone = document.getElementById("telefone").value;
   const email = document.getElementById("email").value;
@@ -46,25 +45,13 @@ async function createOrUpdateCliente(e) {
   const placa = document.getElementById("placa").value;
   const cliId = document.getElementById("cliente-form").dataset.editId;
 
-  const payload = { nome, telefone, email, veiculo, placa };
-  let url = "/api/clientes";
-  let method = "POST";
-  if (cliId) {
-    url += `/${cliId}`;
-    method = "PUT";
-  }
-
+  const dados = { nome, telefone, email, veiculo, placa };
   try {
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) throw new Error("Falha ao salvar cliente");
+    if (cliId) {
+      await atualizarCliente(cliId, dados);
+    } else {
+      await criarCliente(dados);
+    }
     document.getElementById("cliente-form").reset();
     delete document.getElementById("cliente-form").dataset.editId;
     renderClientesTable();
@@ -73,34 +60,30 @@ async function createOrUpdateCliente(e) {
   }
 }
 
-async function editCliente(id) {
-  const token = localStorage.getItem("token");
-  const response = await fetch(`/api/clientes/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!response.ok) return alert("Cliente não encontrado");
-  const cli = await response.json();
-  document.getElementById("nome").value = cli.nome;
-  document.getElementById("telefone").value = cli.telefone || "";
-  document.getElementById("email").value = cli.email || "";
-  document.getElementById("veiculo").value = cli.veiculo;
-  document.getElementById("placa").value = cli.placa;
-  document.getElementById("cliente-form").dataset.editId = id;
-}
+window.editCliente = async function (id) {
+  try {
+    const cli = await getClienteById(id);
+    document.getElementById("nome").value = cli.nome;
+    document.getElementById("telefone").value = cli.telefone || "";
+    document.getElementById("email").value = cli.email || "";
+    document.getElementById("veiculo").value = cli.veiculo;
+    document.getElementById("placa").value = cli.placa;
+    document.getElementById("cliente-form").dataset.editId = id;
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
-async function deleteCliente(id) {
+window.deleteCliente = async function (id) {
   const confirma = confirm("Deseja realmente excluir este cliente?");
   if (!confirma) return;
-  const token = localStorage.getItem("token");
-  const response = await fetch(`/api/clientes/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!response.ok) return alert("Falha ao excluir cliente");
-  renderClientesTable();
-}
-
-// Event listeners
+  try {
+    await excluirCliente(id);
+    renderClientesTable();
+  } catch (err) {
+    alert(err.message);
+  }
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   renderClientesTable();
