@@ -1,6 +1,5 @@
 import gastosService from "../services/gastosService.js";
 import caixaService from "../services/caixaService.js";
-
 // GET /api/gastos
 export async function getTodosGastos(req, res, next) {
   try {
@@ -21,21 +20,38 @@ export async function criarGasto(req, res, next) {
     if (valor <= 0) {
       return res.status(400).json({ error: "Valor deve ser maior que zero." });
     }
-    // Criar gasto e registrar movimentação no caixa (saída)
-    const gasto = await gastosService.criar({ categoria, descricao, valor, data, usuarioId: req.usuario.id });
-    // Registrar no caixa
-    await caixaService.registrarMovimentacao({
+
+    // 1) Obter o caixa aberto usando o método correto
+    const caixa = await caixaService.getCaixaAberto();
+    if (!caixa) {
+      return res.status(400).json({ error: "Você precisa abrir o caixa antes de registrar gastos." });
+    }
+
+    // 2) Registrar movimentação de saída no caixa
+    const mov = await caixaService.registrarMovimentacao({
       tipo: "SAIDA",
       valor,
       usuarioId: req.usuario.id,
-      caixaId: gasto.movCaixaId,
+      caixaId: caixa.id,
       ordemId: null
     });
+
+    // 3) Criar o gasto vinculando ao mov.id retornado
+    const gasto = await gastosService.criar({
+      categoria,
+      descricao,
+      valor,
+      data,
+      usuarioId: req.usuario.id,
+      movCaixaId: mov.id
+    });
+
     res.status(201).json(gasto);
   } catch (err) {
     next(err);
   }
 }
+
 
 // DELETE /api/gastos/:id
 export async function deletarGasto(req, res, next) {

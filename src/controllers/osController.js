@@ -76,3 +76,27 @@ export async function patchStatus(req, res) {
     return res.status(400).json({ error: err.message });
   }
 }
+
+export async function getOSPorParceiro(req, res, next) {
+  try {
+    const { parceiroId, start, end } = req.query;
+    if (!parceiroId || !start || !end) {
+      return res.status(400).json({ error: "Faltando parceiroId, start ou end" });
+    }
+    const dtStart = new Date(start);
+    const dtEnd   = new Date(end);
+    dtEnd.setHours(23,59,59,999);
+
+    const lista = await prisma.ordemServico.findMany({
+      where: {
+        parceiroId: Number(parceiroId),
+        criadoEm: { gte: dtStart, lte: dtEnd }
+      },
+      include: { cliente: true, servico: true }
+    });
+    res.json(lista);
+  } catch (err) {
+    next(err);
+  }
+}
+

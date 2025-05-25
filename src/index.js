@@ -11,8 +11,8 @@ import osRoutes from "./routes/osRoutes.js";
 import caixaRoutes from "./routes/caixaRoutes.js";
 import gastosRoutes from "./routes/gastosRoutes.js";
 import auditoriaRoutes from "./routes/auditoriaRoutes.js";
-import errorHandler from "./middlewares/errorHandler.js";
 import parceriaRoutes from "./routes/parceiraRoutes.js";
+import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
 const app = express();
@@ -23,13 +23,11 @@ const allowedOrigins = [
   "https://app-gerenciador-production.up.railway.app"
 ];
 
-// Configura CORS para aceitar apenas origens autorizadas
+// Configura CORS
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+    if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error("Bloqueado pelo CORS"));
   },
   methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
@@ -40,7 +38,7 @@ app.use(cors({
 // Preflight
 app.options("*", cors());
 
-// Permite JSON no body
+// Body parser para JSON
 app.use(express.json());
 
 // Health-check
@@ -53,22 +51,26 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Servir arquivos estáticos (frontend)
+// Servir frontend estático
 app.use(express.static(path.join(process.cwd(), "public/html")));
 app.use("/css", express.static(path.join(process.cwd(), "public/css")));
-app.use("/js", express.static(path.join(process.cwd(), "public/js")));
+app.use("/js",  express.static(path.join(process.cwd(), "public/js")));
+
+// **Uploads de PDFs de contrato**
+// Expondo a pasta `uploads` via URL pública /uploads
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Rotas da API
-app.use("/api/auth", authRoutes);
-app.use("/api/clientes", clientesRoutes);
-app.use("/api/servicos", servicosRoutes);
-app.use("/api/os", osRoutes);
-app.use("/api/caixa", caixaRoutes);
-app.use("/api/gastos", gastosRoutes);
+app.use("/api/auth",      authRoutes);
+app.use("/api/clientes",  clientesRoutes);
+app.use("/api/servicos",  servicosRoutes);
+app.use("/api/os",        osRoutes);
+app.use("/api/caixa",     caixaRoutes);
+app.use("/api/gastos",    gastosRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
 app.use("/api/parceiras", parceriaRoutes);
 
-// Tratamento de erro (middleware final)
+// Middleware global de erro
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

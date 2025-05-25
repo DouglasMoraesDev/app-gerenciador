@@ -1,24 +1,32 @@
 import prisma from "../prismaClient.js";
 
 export const getTodasParceiras = async () => {
-  return await prisma.empresaParceira.findMany({ orderBy: { criadoEm: 'desc' } });
+  return prisma.empresaParceira.findMany({
+    orderBy: { criadoEm: "desc" }
+  });
 };
 
 export const getParceiraPorId = async (id) => {
-  return await prisma.empresaParceira.findUnique({ where: { id: Number(id) } });
+  return prisma.empresaParceira.findUnique({
+    where: { id: Number(id) }
+  });
 };
 
-export const criarParceira = async (data) => {
-  return await prisma.empresaParceira.create({ data });
+export const criarParceira = async ({ nome, cnpj, descricao, valorMensal, contratoUrl }) => {
+  return prisma.empresaParceira.create({
+    data: { nome, cnpj, descricao, valorMensal, contratoUrl }
+  });
 };
 
 export const atualizarParceira = async (id, data) => {
-  return await prisma.empresaParceira.update({
+  return prisma.empresaParceira.update({
     where: { id: Number(id) },
     data
   });
 };
 
 export const deletarParceira = async (id) => {
-  return await prisma.empresaParceira.delete({ where: { id: Number(id) } });
+  return prisma.empresaParceira.delete({
+    where: { id: Number(id) }
+  });
 };

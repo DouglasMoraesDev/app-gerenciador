@@ -4,6 +4,7 @@ import {
   getOSById,
   criarOS,
   atualizarOS,
+  getOSPorParceiro,
   deletarOS,
   patchStatus
 } from "../controllers/osController.js";
@@ -20,5 +21,5 @@ router.post("/",   criarOS);                // POST /api/os
 router.put("/:id", atualizarOS);             // PUT /api/os/:id
 router.delete("/:id", deletarOS);             // DELETE /api/os/:id
 router.patch("/:id/status", patchStatus);   // PATCH /api/os/:id/status
-
+router.get("/parceiro", getOSPorParceiro);
 export default router;

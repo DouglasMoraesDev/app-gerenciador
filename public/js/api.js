@@ -336,29 +336,55 @@ export async function gerarRelatorio(periodo, valor) {
 // ================================
 // EMPRESAS PARCEIRAS
 // ================================
-
 export async function getParceiras() {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/parceiras`, {
-    headers: { Authorization: `Bearer ${token}` },
+    headers: { Authorization: `Bearer ${token}` }
   });
   if (!resp.ok) throw new Error("Erro ao buscar empresas parceiras");
   return resp.json();
 }
 
-export async function criarParceira(dados) {
+export async function criarParceira(formData) {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/parceiras`, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: dados, // FormData — não precisa de Content-Type!
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData     // FormData, não JSON
   });
   if (!resp.ok) {
-    const erroJson = await resp.json();
-    throw new Error(erroJson.error || "Erro ao criar empresa parceira");
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || "Erro ao criar empresa parceira");
   }
   return resp.json();
 }
 
+
+/**
+ * Busca movimentações em intervalo de datas.
+ * @param {string} start — "YYYY-MM-DD"
+ * @param {string} end   — "YYYY-MM-DD"
+ */
+export async function getMovimentacoesRange(start, end) {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(
+    `${BASE_URL}/api/auditoria/range?start=${start}&end=${end}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!resp.ok) {
+    const erro = await resp.json();
+    throw new Error(erro.error || "Erro ao buscar movimentações por intervalo");
+  }
+  return resp.json();
+}
+
+
+export async function getOSPorParceiro(parceiroId, start, end) {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(
+    `${BASE_URL}/api/os/parceiro?parceiroId=${parceiroId}&start=${start}&end=${end}`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!resp.ok) throw new Error("Erro ao buscar OS do parceiro");
+  return resp.json();
+}

@@ -98,6 +98,9 @@ model OrdemServico {
   // Relacionamento one-to-one com CaixaMov (entrada ao finalizar)
   movCaixa   CaixaMov? @relation(name: "OScaixa", fields: [movCaixaId], references: [id])
   movCaixaId Int?      @unique
+
+  parceiro   EmpresaParceira? @relation(fields: [parceiroId], references: [id])
+  parceiroId Int?
 }
 
 model Caixa {
@@ -151,13 +154,14 @@ model Gasto {
   movCaixaId Int?      @unique
 }
 
-
 model EmpresaParceira {
-  id           Int      @id @default(autoincrement())
-  nome         String
-  cnpj         String   @unique
-  descricao    String
-  valorMensal  Float
-  contratoUrl  String?
-  criadoEm     DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  nome        String
+  cnpj        String   @unique
+  descricao   String
+  valorMensal Float
+  contratoUrl String?
+  criadoEm    DateTime @default(now())
+
+  ordens OrdemServico[] // relação inversa: uma empresa pode ter várias OS
 }

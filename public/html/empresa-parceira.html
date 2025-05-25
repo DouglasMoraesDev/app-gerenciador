@@ -8,17 +8,17 @@
 </head>
 <body>
   <header>
-    <h1>Lava-Rápido</h1>
+    <h1>Lava-Rápido Manager</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
     <nav id="main-nav">
       <ul>
-        <li><a href="/dashboard.html" class="active">Home</a></li>
+        <li><a href="/dashboard.html">Home</a></li>
         <li><a href="/os-list.html">Ordens do Dia</a></li>
         <li><a href="/criar-os.html">Criar Ordem</a></li>
         <li><a href="/caixa.html">Caixa</a></li>
-        <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+        <li><a href="/empresa-parceira.html" class="active">Empresas Parceiras</a></li>
         <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="/clientes.html">Clientes</a></li>
         <li><a href="/servicos.html">Serviços</a></li>
         <li><a href="/auditoria.html">Auditoria</a></li>
         <li><a href="/gastos.html">Gastos</a></li>
@@ -27,14 +27,19 @@
     </nav>
   </header>
   <script>
-    document.getElementById('menu-btn')
-      .addEventListener('click', () => document.getElementById('main-nav').classList.toggle('open'));
+    document.getElementById('menu-btn').addEventListener('click', () => {
+      document.getElementById('main-nav').classList.toggle('open');
+    });
   </script>
 
   <div class="container">
-    <h2>Cadastrar Empresa Parceira</h2>
+    <h2>Empresas Parceiras</h2>
+
     <section class="form-section">
+      <h3 id="form-title">Cadastrar Nova Parceira</h3>
       <form id="empresa-form" enctype="multipart/form-data">
+        <!-- campo oculto para ID em modo edição -->
+        <input type="hidden" id="parceira-id" name="id"/>
         <div class="form-group">
           <label for="nome">Nome da Empresa</label>
           <input type="text" id="nome" name="nome" required placeholder="Razão social"/>
@@ -53,14 +58,26 @@
         </div>
         <div class="form-group">
           <label for="contrato">Contrato (PDF)</label>
-          <input type="file" id="contrato" name="contrato" accept="application/pdf" required/>
+          <input type="file" id="contrato" name="contrato" accept="application/pdf"/>
+          <small id="atual-contrato"></small>
         </div>
-        <button type="submit">Salvar Parceira</button>
+        <button type="submit" id="submit-btn">Salvar Parceira</button>
+        <button type="button" id="cancel-edit-btn" style="display:none; margin-left:8px;">Cancelar</button>
       </form>
     </section>
 
-    <h2>Lista de Parceiras</h2>
-    <div class="cards-container" id="parceiras-container"></div>
+    <h3>Lista de Parceiras</h3>
+    <div class="cards-container" id="parceiras-container">
+      <!-- cards serão inseridos aqui via JS -->
+    </div>
+  </div>
+
+  <!-- Modal de detalhes -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span id="modal-close" class="modal-close">&times;</span>
+      <div id="modal-body"></div>
+    </div>
   </div>
 
   <footer>
