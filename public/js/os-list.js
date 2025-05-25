@@ -1,70 +1,121 @@
-import {
-  getOrdens,
-  changeStatus,
-  BASE_URL
-} from "./api.js";
+import { getOrdens, changeStatus } from "./api.js";
 
-const tbody = document.querySelector("#os-table tbody");
-const filtro = document.getElementById("filtroStatus");
-let ordens = [];
+const filtro             = document.getElementById("filtroStatus");
+const container          = document.getElementById("os-container");
+const modal              = document.getElementById("os-modal");
+const closeBtn           = document.getElementById("modal-close");
+const statusSelect       = document.getElementById("modal-status-select");
+const pagamentoSelect    = document.getElementById("modal-pagamento-select");
+const labelPagamento     = document.getElementById("label-pagamento");
+const finalizarBtn       = document.getElementById("modal-finalizar");
 
-// Renderiza a tabela com filtragem
-function renderTable(list) {
-  tbody.innerHTML = "";
-  list.forEach(os => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${os.id}</td>
-      <td>${os.cliente.nome}</td>
-      <td>${os.descricao}</td>
-      <td>
-        <select data-id="${os.id}" class="status-select">
-          <option${os.status==="PENDENTE"?" selected":""} value="PENDENTE">Pendente</option>
-          <option${os.status==="EM_ANDAMENTO"?" selected":""} value="EM_ANDAMENTO">Em Andamento</option>
-          <option${os.status==="PRONTO"?" selected":""} value="PRONTO">Pronto</option>
-          <option${os.status==="ENTREGUE"?" selected":""} value="ENTREGUE">Entregue</option>
-        </select>
-      </td>
-      <td>R$ ${os.valorTotal.toFixed(2)}</td>
-      <td>${new Date(os.criadoEm).toLocaleString()}</td>
-      <td>
-        <button data-action="refresh" data-id="${os.id}">🔄</button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-  // vincula handlers nos selects
-  document.querySelectorAll(".status-select").forEach(sel => {
-    sel.addEventListener("change", onStatusChange);
-  });
-  // botões refresh
-  document.querySelectorAll("button[data-action=refresh]").forEach(btn => {
-    btn.addEventListener("click", load);
-  });
-}
+let ordens    = [];
+let currentOs = null;
 
-// Quando muda status
-async function onStatusChange(e) {
-  const id = Number(e.target.dataset.id);
-  const novoStatus = e.target.value;
-  try {
-    await changeStatus(id, novoStatus);
-    alert(`Status da OS #${id} alterado para ${novoStatus}`);
-  } catch (err) {
-    alert(`Erro ao alterar status: ${err.message}`);
+// Abre o modal e preenche dados
+function openModal(os) {
+  currentOs = os;
+  document.getElementById("modal-servico-nome").textContent = os.servico.nome;
+  document.getElementById("modal-cliente-nome").textContent = os.cliente.nome;
+  document.getElementById("modal-descricao").textContent    = os.descricaoServico;
+  document.getElementById("modal-valor").textContent        = os.valorServico.toFixed(2);
+  document.getElementById("modal-criado-em").textContent    = new Date(os.criadoEm).toLocaleString();
+
+  statusSelect.value = os.status;
+  labelPagamento.style.display   = "none";
+  pagamentoSelect.style.display = "none";
+  finalizarBtn.disabled          = true;
+
+  if (os.status === "ENTREGUE") {
+    statusSelect.disabled      = true;
+    finalizarBtn.style.display = "none";
+  } else {
+    statusSelect.disabled      = false;
+    finalizarBtn.style.display = "block";
   }
+
+  modal.style.display = "flex";
 }
 
-// Carrega as ordens do dia (filtra por data de hoje)
+// Fecha o modal
+closeBtn.addEventListener("click", () => modal.style.display = "none");
+modal.addEventListener("click", e => {
+  if (e.target === modal) modal.style.display = "none";
+});
+
+// Muda status para não-ENTREGUE
+statusSelect.addEventListener("change", async () => {
+  if (!currentOs) return;
+  if (statusSelect.value === "ENTREGUE") {
+    labelPagamento.style.display   = "block";
+    pagamentoSelect.style.display = "block";
+    pagamentoSelect.value          = "PIX";
+    finalizarBtn.disabled          = false;
+  } else {
+    labelPagamento.style.display   = "none";
+    pagamentoSelect.style.display = "none";
+    finalizarBtn.disabled          = true;
+    try {
+      await changeStatus(currentOs.id, statusSelect.value, null);
+      await load();
+    } catch (err) {
+      alert("Erro ao alterar status: " + err.message);
+    }
+  }
+});
+
+// Finalizar OS
+finalizarBtn.addEventListener("click", async () => {
+  if (!currentOs) return;
+  finalizarBtn.disabled      = true;
+  statusSelect.disabled      = true;
+  pagamentoSelect.disabled   = true;
+
+  try {
+    await changeStatus(currentOs.id, "ENTREGUE", pagamentoSelect.value);
+    // Recarrega TODAS as ordens para atualizar status em todos os cards
+    await load();
+    // Opcional: reabrir modal travado
+    openModal({ ...currentOs, status: "ENTREGUE", modalidadePagamento: pagamentoSelect.value });
+  } catch (err) {
+    alert("Erro ao finalizar: " + err.message);
+    finalizarBtn.disabled    = false;
+    statusSelect.disabled    = false;
+    pagamentoSelect.disabled = false;
+  }
+});
+
+// Renderiza os cards
+function renderCards(list) {
+  container.innerHTML = "";
+  list.forEach(os => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <h3>OS #${os.id}: ${os.servico.nome}</h3>
+      <p><strong>Cliente:</strong> ${os.cliente.nome}</p>
+      <p><strong>Status:</strong> ${os.status}</p>
+      <p><strong>Valor:</strong> R$ ${os.valorServico.toFixed(2)}</p>
+    `;
+    card.addEventListener("click", () => openModal(os));
+    container.appendChild(card);
+  });
+}
+
+// Carrega e filtra ordens do dia
 async function load() {
-  const todas = await getOrdens();
-  // filtra somente ordens criadas hoje
-  const hoje = new Date().toDateString();
-  ordens = todas.filter(os => new Date(os.criadoEm).toDateString() === hoje);
-  // aplica filtro de status
-  const statusFiltro = filtro.value;
-  const list = statusFiltro ? ordens.filter(o => o.status === statusFiltro) : ordens;
-  renderTable(list);
+  try {
+    const todas   = await getOrdens();
+    const hojeStr = new Date().toDateString();
+    ordens = todas.filter(os => new Date(os.criadoEm).toDateString() === hojeStr);
+    const filtroVal = filtro.value;
+    const lista = filtroVal
+      ? ordens.filter(o => o.status === filtroVal)
+      : ordens;
+    renderCards(lista);
+  } catch (err) {
+    alert("Erro ao carregar ordens: " + err.message);
+  }
 }
 
 filtro.addEventListener("change", load);

@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ordens do Dia - Lava-Rápido</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ordens de Serviço - Lava-Rápido</title>
+  <link rel="stylesheet" href="/css/styles.css"/>
 </head>
 <body>
   <header>
-    <h1>Ordens de Serviço do Dia</h1>
+    <h1>Lava-Rápido</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
-      <nav id="main-nav">
-        <ul>
-          <li><a href="/dashboard.html">Home</a></li>
-          <li><a href="/os-list.html">Ordens do Dia</a></li>
-          <li><a href="/criar-os.html">Criar Ordem</a></li>
-          <li><a href="/caixa.html">Caixa</a></li>
-          <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
-          <li><a href="/clientes.html">Clientes</a></li>
-          <li><a href="/auditoria.html">Auditoria</a></li>
-          <li><a href="/estoque.html">Estoque</a></li>
-          <li><a href="/login.html" id="logout-btn">Sair</a></li>
-        </ul>
-      </nav>
+    <nav id="main-nav">
+      <ul>
+        <li><a href="/dashboard.html" class="active">Home</a></li>
+        <li><a href="/os-list.html">Ordens do Dia</a></li>
+        <li><a href="/criar-os.html">Criar Ordem</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+        <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="/servicos.html">Serviços</a></li>
+        <li><a href="/auditoria.html">Auditoria</a></li>
+        <li><a href="/gastos.html">Gastos</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
+      </ul>
+    </nav>
   </header>
-
   <script>
     document.getElementById('menu-btn').addEventListener('click', () => {
       document.getElementById('main-nav').classList.toggle('open');
@@ -43,21 +44,36 @@
       </select>
     </div>
 
-    <div class="table-wrapper">
-      <table id="os-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Descrição</th>
-            <th>Status</th>
-            <th>Valor</th>
-            <th>Criada Em</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <!-- Container de cards -->
+    <div class="cards-container" id="os-container"></div>
+
+    <!-- Modal de detalhes -->
+    <div id="os-modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span id="modal-close" class="modal-close">&times;</span>
+        <h3 id="modal-servico-nome"></h3>
+        <p><strong>Cliente:</strong> <span id="modal-cliente-nome"></span></p>
+        <p><strong>Descrição:</strong> <span id="modal-descricao"></span></p>
+        <p><strong>Valor:</strong> R$ <span id="modal-valor"></span></p>
+        <p><strong>Criada Em:</strong> <span id="modal-criado-em"></span></p>
+
+        <label for="modal-status-select"><strong>Status:</strong></label>
+        <select id="modal-status-select">
+          <option value="PENDENTE">Pendente</option>
+          <option value="EM_ANDAMENTO">Em Andamento</option>
+          <option value="PRONTO">Pronto</option>
+          <option value="ENTREGUE">Entregue</option>
+        </select>
+
+        <label for="modal-pagamento-select" id="label-pagamento" style="display:none;"><strong>Pagamento:</strong></label>
+        <select id="modal-pagamento-select" style="display:none;">
+          <option value="PIX">PIX</option>
+          <option value="CARTAO">Cartão</option>
+          <option value="DINHEIRO">Dinheiro</option>
+        </select>
+
+        <button id="modal-finalizar" disabled>Finalizar</button>
+      </div>
     </div>
   </div>
 

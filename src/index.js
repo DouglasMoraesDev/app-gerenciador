@@ -5,12 +5,14 @@ import path from "path";
 
 import prisma from "./prismaClient.js";
 import authRoutes from "./routes/authRoutes.js";
+import clientesRoutes from "./routes/clientesRoutes.js";
+import servicosRoutes from "./routes/servicosRoutes.js";
 import osRoutes from "./routes/osRoutes.js";
 import caixaRoutes from "./routes/caixaRoutes.js";
-import clientesRoutes from "./routes/clientesRoutes.js";
+import gastosRoutes from "./routes/gastosRoutes.js";
+import auditoriaRoutes from "./routes/auditoriaRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
-import estoqueRoutes from './routes/estoqueRoutes.js';
-import auditoriaRoutes from './routes/auditoriaRoutes.js';
+import parceriaRoutes from "./routes/parceiraRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -21,24 +23,24 @@ const allowedOrigins = [
   "https://app-gerenciador-production.up.railway.app"
 ];
 
-// Configura CORS para aceitar esses dois domínios
+// Configura CORS para aceitar apenas origens autorizadas
 app.use(cors({
   origin: (origin, callback) => {
-    // permitir requisições sem origin (Postman, mobile apps, etc.)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error("Bloqueado pelo CORS"));
   },
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"],
+  methods: ["GET","POST","PUT","PATCH","DELETE","OPTIONS"],
   allowedHeaders: ["Content-Type","Authorization"],
   credentials: true
 }));
 
-// Para responder corretamente ao preflight (OPTIONS)
+// Preflight
 app.options("*", cors());
 
+// Permite JSON no body
 app.use(express.json());
 
 // Health-check
@@ -51,21 +53,22 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Serve estáticos
+// Servir arquivos estáticos (frontend)
 app.use(express.static(path.join(process.cwd(), "public/html")));
 app.use("/css", express.static(path.join(process.cwd(), "public/css")));
 app.use("/js", express.static(path.join(process.cwd(), "public/js")));
 
 // Rotas da API
 app.use("/api/auth", authRoutes);
+app.use("/api/clientes", clientesRoutes);
+app.use("/api/servicos", servicosRoutes);
 app.use("/api/os", osRoutes);
 app.use("/api/caixa", caixaRoutes);
-app.use("/api/clientes", clientesRoutes);
+app.use("/api/gastos", gastosRoutes);
+app.use("/api/auditoria", auditoriaRoutes);
+app.use("/api/parceiras", parceriaRoutes);
 
-app.use('/api/estoque', estoqueRoutes);
-app.use('/api/auditoria', auditoriaRoutes);
-
-// Tratamento de erro
+// Tratamento de erro (middleware final)
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;

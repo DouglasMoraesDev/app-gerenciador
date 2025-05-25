@@ -1,62 +1,55 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Caixa - ADM Lava-Rápido</title>
-  <link rel="stylesheet" href="/css/styles.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Caixa - Lava-Rápido</title>
+  <link rel="stylesheet" href="/css/styles.css"/>
 </head>
 <body>
   <header>
-    <h1>Caixa</h1>
+    <h1>Lava-Rápido</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
-      <nav id="main-nav">
-        <ul>
-          <li><a href="/dashboard.html">Home</a></li>
-          <li><a href="/os-list.html">Ordens do Dia</a></li>
-          <li><a href="/criar-os.html">Criar Ordem</a></li>
-          <li><a href="/caixa.html">Caixa</a></li>
-          <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
-          <li><a href="/clientes.html">Clientes</a></li>
-          <li><a href="/auditoria.html">Auditoria</a></li>
-          <li><a href="/estoque.html">Estoque</a></li>
-          <li><a href="/login.html" id="logout-btn">Sair</a></li>
-        </ul>
-      </nav>
+    <nav id="main-nav">
+      <ul>
+        <li><a href="/dashboard.html" class="active">Home</a></li>
+        <li><a href="/os-list.html">Ordens do Dia</a></li>
+        <li><a href="/criar-os.html">Criar Ordem</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+        <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="/servicos.html">Serviços</a></li>
+        <li><a href="/auditoria.html">Auditoria</a></li>
+        <li><a href="/gastos.html">Gastos</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
+      </ul>
+    </nav>
   </header>
-
-  <script>
+      <script>
     document.getElementById('menu-btn').addEventListener('click', () => {
       document.getElementById('main-nav').classList.toggle('open');
     });
   </script>
 
+
+  </header>
   <div class="container">
-    <div id="caixa-actions">
-      <button id="abrir-caixa-btn">Abrir Caixa</button>
-      <button id="fechar-caixa-btn" disabled>Fechar Caixa</button>
-    </div>
+    <h2>Caixa</h2>
+    <div class="cards-container" id="caixa-cards"></div>
 
-    <h3>Movimentações do Dia</h3>
-    <!-- **Tabela** que o caixa.js espera -->
-    <div class="table-wrapper">
-      <table id="mov-table">
-        <thead>
-          <tr><th>Tipo</th><th>Valor</th><th>Data/Hora</th><th>Responsável</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <div id="saldo-atual" style="margin-top:20px;">
-      <p>Saldo Atual: <strong id="saldo-valor">R$ 0,00</strong></p>
+    <div id="mov-modal" class="modal" style="display:none;">
+      <div class="modal-content">
+        <span id="mov-modal-close" class="modal-close">&times;</span>
+        <h3>Movimentações do Caixa</h3>
+        <div id="mov-list"></div>
+      </div>
     </div>
   </div>
 
   <footer>
     <p>&copy; 2025 Lava-Rápido</p>
   </footer>
-
   <script type="module" src="/js/caixa.js"></script>
 </body>
 </html>

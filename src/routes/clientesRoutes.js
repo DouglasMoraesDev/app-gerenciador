@@ -1,5 +1,3 @@
-// src/routes/clientesRoutes.js
-
 import { Router } from "express";
 import {
   getTodosClientes,
@@ -11,6 +9,8 @@ import {
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const router = Router();
+
+// Todas as rotas a seguir exigem autenticação
 router.use(authMiddleware);
 
 router.get("/",      getTodosClientes);   // GET /api/clientes

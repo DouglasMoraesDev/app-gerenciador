@@ -1,4 +1,6 @@
-// Definição da fonte de dados (MySQL) e geração do cliente Prisma.
+// ----------------------
+// prisma/schema.prisma (corrigido)
+// ----------------------
 
 datasource db {
   provider = "mysql"
@@ -9,58 +11,153 @@ generator client {
   provider = "prisma-client-js"
 }
 
-// ----------------------
-// Modelos principais:
-// ----------------------
+enum Papel {
+  ADMIN
+  OPERADOR
+  MECANICO
+}
+
+enum StatusOS {
+  PENDENTE
+  EM_ANDAMENTO
+  PRONTO
+  ENTREGUE
+}
+
+enum TipoMov {
+  ENTRADA
+  SAIDA
+}
+
+enum ModalidadePagamento {
+  PIX
+  CARTAO
+  DINHEIRO
+}
 
 model Usuario {
-  id         Int          @id @default(autoincrement())
-  nome       String
-  email      String       @unique
-  senha      String
-  papel      String       // ADMIN, OPERADOR, MECANICO, etc.
-  criadoEm   DateTime     @default(now())
-  
-  // Relacionamento com Caixa (quem registrou)
-  caixas     Caixa[]      @relation("UsuarioCaixas")
+  id       Int      @id @default(autoincrement())
+  nome     String
+  email    String   @unique
+  senha    String
+  papel    Papel    @default(OPERADOR)
+  criadoEm DateTime @default(now())
+
+  caixas        Caixa[]        @relation("UsuarioCaixas")
+  movs          CaixaMov[] // movimentações lançadas pelo usuário
+  osFinalizadas OrdemServico[] @relation("UsuarioFinalizacao")
+  gastos        Gasto[] // gastos lançados pelo usuário
 }
 
 model Cliente {
-  id         Int            @id @default(autoincrement())
-  nome       String
-  telefone   String?
-  email      String?
-  veiculo    String
-  placa      String         @unique
-  criadoEm   DateTime       @default(now())
+  id       Int      @id @default(autoincrement())
+  nome     String
+  telefone String?
+  email    String?
+  veiculo  String
+  placa    String   @unique
+  criadoEm DateTime @default(now())
 
-  // Histórico de Ordens de Serviço
-  ordens     OrdemServico[]
+  ordens OrdemServico[] // histórico de OS deste cliente
+}
+
+model Servico {
+  id        Int      @id @default(autoincrement())
+  nome      String   @unique
+  descricao String
+  valor     Float
+  criadoEm  DateTime @default(now())
+
+  ordens OrdemServico[] // OS que usam este serviço
 }
 
 model OrdemServico {
-  id             Int       @id @default(autoincrement())
-  descricao      String
-  status         String    @default("PENDENTE") // PENDENTE, EM_ANDAMENTO, PRONTO, ENTREGUE
-  valorTotal     Float
-  criadoEm       DateTime  @default(now())
-  atualizadoEm   DateTime  @updatedAt
-  
+  id Int @id @default(autoincrement())
+
   // Relação com Cliente
-  cliente        Cliente   @relation(fields: [clienteId], references: [id])
-  clienteId      Int
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+  clienteId Int
+
+  // Relação com Serviço
+  servico   Servico @relation(fields: [servicoId], references: [id])
+  servicoId Int
+
+  descricaoServico String // cópia da descrição do serviço na criação
+  valorServico     Float // cópia do valor do serviço na criação
+
+  status       StatusOS @default(PENDENTE)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  // Finalização
+  finalizadoPor   Usuario? @relation("UsuarioFinalizacao", fields: [finalizadoPorId], references: [id])
+  finalizadoPorId Int?
+
+  modalidadePagamento ModalidadePagamento?
+
+  // Relacionamento one-to-one com CaixaMov (entrada ao finalizar)
+  movCaixa   CaixaMov? @relation(name: "OScaixa", fields: [movCaixaId], references: [id])
+  movCaixaId Int?      @unique
 }
 
 model Caixa {
-  id              Int       @id @default(autoincrement())
-  dataAbertura    DateTime
-  dataFechamento  DateTime?
-  saldoInicial    Float
-  saldoFinal      Float?
-  entradas        Float     @default(0)
-  saidas          Float     @default(0)
+  id             Int       @id @default(autoincrement())
+  dataAbertura   DateTime
+  dataFechamento DateTime?
+  saldoInicial   Float
+  saldoFinal     Float?
+  entradas       Float     @default(0)
+  saidas         Float     @default(0)
 
-  // Quem abriu/fechou o caixa
-  usuario         Usuario   @relation("UsuarioCaixas", fields: [usuarioId], references: [id])
-  usuarioId       Int
+  usuario   Usuario @relation("UsuarioCaixas", fields: [usuarioId], references: [id])
+  usuarioId Int
+
+  movimentacoes CaixaMov[] // todas movimentações deste caixa
+}
+
+model CaixaMov {
+  id        Int      @id @default(autoincrement())
+  tipo      TipoMov
+  valor     Float
+  createdAt DateTime @default(now())
+
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+
+  caixa   Caixa @relation(fields: [caixaId], references: [id])
+  caixaId Int
+
+  // Se for entrada de OS finalizada (one-to-one)
+  ordem   OrdemServico? @relation(name: "OScaixa")
+  ordemId Int?
+
+  // Se for saída de Gasto (one-to-one)
+  gasto   Gasto? @relation(name: "GastoCaixa")
+  gastoId Int?
+}
+
+model Gasto {
+  id        Int      @id @default(autoincrement())
+  categoria String // Ex: "Luz", "Água", "Produtos"
+  descricao String
+  valor     Float
+  data      DateTime @default(now())
+
+  usuario   Usuario @relation(fields: [usuarioId], references: [id])
+  usuarioId Int
+
+  // One-to-one com CaixaMov (saída)
+  movCaixa   CaixaMov? @relation(name: "GastoCaixa", fields: [movCaixaId], references: [id])
+  movCaixaId Int?      @unique
+}
+
+
+model EmpresaParceira {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  cnpj         String   @unique
+  descricao    String
+  valorMensal  Float
+  contratoUrl  String?
+  criadoEm     DateTime @default(now())
 }

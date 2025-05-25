@@ -1,76 +1,78 @@
-// src/controllers/osController.js
-import prisma from '../prismaClient.js'  // seu Prisma Client
+import prisma from "../prismaClient.js";
+import osService from "../services/osService.js";
+import caixaService from "../services/caixaService.js";
 
-// Listar todas as OS
+// GET /api/os
 export async function getTodasOS(req, res) {
   try {
-    const lista = await prisma.os.findMany()  // use o nome do model em lowerCamelCase
-    return res.json(lista)
+    // Inclui dados de cliente e serviço
+    const lista = await osService.getTodas();
+    res.json(lista);
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ error: err.message });
   }
 }
 
-// Buscar OS por ID
+// GET /api/os/:id
 export async function getOSById(req, res) {
   try {
-    const { id } = req.params
-    const os = await prisma.os.findUnique({ where: { id: Number(id) } })
-    if (!os) return res.status(404).json({ error: 'OS não encontrada' })
-    return res.json(os)
+    const { id } = req.params;
+    const os = await osService.getPorId(Number(id));
+    if (!os) return res.status(404).json({ error: "OS não encontrada" });
+    return res.json(os);
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ error: err.message });
   }
 }
 
-// Criar nova OS
+// POST /api/os
 export async function criarOS(req, res) {
   try {
-    const dados = req.body
-    const os = await prisma.os.create({ data: dados })
-    return res.status(201).json(os)
+    const { clienteId, servicoId } = req.body;
+    if (!clienteId || !servicoId) {
+      return res.status(400).json({ error: "Cliente e serviço são obrigatórios." });
+    }
+
+    // Criar a OS via service (que copia descrição e valor do serviço)
+    const novaOs = await osService.criar(req.body);
+    res.status(201).json(novaOs);
   } catch (err) {
-    return res.status(400).json({ error: err.message })
+    return res.status(400).json({ error: err.message });
   }
 }
 
-// Atualizar OS
+// PUT /api/os/:id
 export async function atualizarOS(req, res) {
   try {
-    const { id } = req.params
-    const dados = req.body
-    const os = await prisma.os.update({
-      where: { id: Number(id) },
-      data: dados,
-    })
-    return res.json(os)
+    const { id } = req.params;
+    const dados = req.body;
+    const os = await osService.atualizar(Number(id), dados);
+    return res.json(os);
   } catch (err) {
-    return res.status(400).json({ error: err.message })
+    return res.status(400).json({ error: err.message });
   }
 }
 
-// Deletar OS
+// DELETE /api/os/:id
 export async function deletarOS(req, res) {
   try {
-    const { id } = req.params
-    await prisma.os.delete({ where: { id: Number(id) } })
-    return res.status(204).send()
+    const { id } = req.params;
+    await osService.deletar(Number(id));
+    return res.status(204).send();
   } catch (err) {
-    return res.status(500).json({ error: err.message })
+    return res.status(500).json({ error: err.message });
   }
 }
 
-// Patch de status da OS
+// PATCH /api/os/:id/status
 export async function patchStatus(req, res) {
   try {
-    const { id } = req.params
-    const { status } = req.body
-    const os = await prisma.os.update({
-      where: { id: Number(id) },
-      data: { status },
-    })
-    return res.json(os)
+    const { id } = req.params;
+    const { status, modalidadePagamento } = req.body;
+    // Atualiza status e, se finalizada, registra movimentação no caixa
+    const osFinalizada = await osService.patchStatus(Number(id), status, modalidadePagamento, req.usuario.id);
+    return res.json(osFinalizada);
   } catch (err) {
-    return res.status(400).json({ error: err.message })
+    return res.status(400).json({ error: err.message });
   }
 }

@@ -1,0 +1,49 @@
+import gastosService from "../services/gastosService.js";
+import caixaService from "../services/caixaService.js";
+
+// GET /api/gastos
+export async function getTodosGastos(req, res, next) {
+  try {
+    const lista = await gastosService.getTodos();
+    res.json(lista);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// POST /api/gastos
+export async function criarGasto(req, res, next) {
+  try {
+    const { categoria, descricao, valor, data } = req.body;
+    if (!categoria || !descricao || valor == null) {
+      return res.status(400).json({ error: "Categoria, descrição e valor são obrigatórios." });
+    }
+    if (valor <= 0) {
+      return res.status(400).json({ error: "Valor deve ser maior que zero." });
+    }
+    // Criar gasto e registrar movimentação no caixa (saída)
+    const gasto = await gastosService.criar({ categoria, descricao, valor, data, usuarioId: req.usuario.id });
+    // Registrar no caixa
+    await caixaService.registrarMovimentacao({
+      tipo: "SAIDA",
+      valor,
+      usuarioId: req.usuario.id,
+      caixaId: gasto.movCaixaId,
+      ordemId: null
+    });
+    res.status(201).json(gasto);
+  } catch (err) {
+    next(err);
+  }
+}
+
+// DELETE /api/gastos/:id
+export async function deletarGasto(req, res, next) {
+  try {
+    const { id } = req.params;
+    await gastosService.deletar(Number(id));
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}

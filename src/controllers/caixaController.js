@@ -1,9 +1,9 @@
-// src/controllers/caixaController.js
 import caixaService from "../services/caixaService.js";
+import gastosService from "../services/gastosService.js";
 
+// GET /api/caixa/atual
 export async function getCaixaAtual(req, res, next) {
   try {
-    // usuário já foi extraído pelo authMiddleware (req.usuario.id), mas você não precisa disso aqui
     const caixa = await caixaService.getCaixaAberto();
     res.json(caixa || null);
   } catch (err) {
@@ -11,9 +11,13 @@ export async function getCaixaAtual(req, res, next) {
   }
 }
 
+// POST /api/caixa/abrir
 export async function abrirCaixa(req, res, next) {
   try {
     const { saldoInicial } = req.body;
+    if (saldoInicial == null || saldoInicial < 0) {
+      return res.status(400).json({ error: "Saldo inicial inválido." });
+    }
     const usuarioId = req.usuario.id;
     const caixa = await caixaService.abrir(saldoInicial, usuarioId);
     res.status(201).json(caixa);
@@ -22,6 +26,7 @@ export async function abrirCaixa(req, res, next) {
   }
 }
 
+// POST /api/caixa/fechar/:id
 export async function fecharCaixa(req, res, next) {
   try {
     const { id } = req.params;
@@ -32,6 +37,7 @@ export async function fecharCaixa(req, res, next) {
   }
 }
 
+// GET /api/caixa/movimentacoes
 export async function getMovimentacoesDoDia(req, res, next) {
   try {
     const movs = await caixaService.getMovimentacoes();

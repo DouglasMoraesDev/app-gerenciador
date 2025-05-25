@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Empresas Parceiras - Lava-Rápido Manager</title>
+  <title>Gastos - Lava-Rápido Manager</title>
   <link rel="stylesheet" href="/css/styles.css"/>
 </head>
 <body>
@@ -26,47 +26,44 @@
       </ul>
     </nav>
   </header>
-  <script>
+     <script>
     document.getElementById('menu-btn')
       .addEventListener('click', () => document.getElementById('main-nav').classList.toggle('open'));
   </script>
 
+  </header>
+  
   <div class="container">
-    <h2>Cadastrar Empresa Parceira</h2>
+    <h2>Gastos</h2>
     <section class="form-section">
-      <form id="empresa-form" enctype="multipart/form-data">
+      <form id="gasto-form">
         <div class="form-group">
-          <label for="nome">Nome da Empresa</label>
-          <input type="text" id="nome" name="nome" required placeholder="Razão social"/>
+          <label for="categoria">Categoria</label>
+          <input type="text" id="categoria" name="categoria" required/>
         </div>
         <div class="form-group">
-          <label for="cnpj">CNPJ</label>
-          <input type="text" id="cnpj" name="cnpj" pattern="\d{14}" placeholder="Somente números" required/>
+          <label for="descricao">Descrição</label>
+          <textarea id="descricao" name="descricao" rows="2" required></textarea>
         </div>
         <div class="form-group">
-          <label for="descricao">Descrição do Serviço</label>
-          <textarea id="descricao" name="descricao" rows="3" required></textarea>
+          <label for="valor">Valor (R$)</label>
+          <input type="number" id="valor" name="valor" step="0.01" required/>
         </div>
         <div class="form-group">
-          <label for="valorMensal">Valor Mensal (R$)</label>
-          <input type="number" id="valorMensal" name="valorMensal" step="0.01" required/>
+          <label for="data">Data</label>
+          <input type="date" id="data" name="data" required/>
         </div>
-        <div class="form-group">
-          <label for="contrato">Contrato (PDF)</label>
-          <input type="file" id="contrato" name="contrato" accept="application/pdf" required/>
-        </div>
-        <button type="submit">Salvar Parceira</button>
+        <button type="submit">Registrar Gasto</button>
       </form>
     </section>
 
-    <h2>Lista de Parceiras</h2>
-    <div class="cards-container" id="parceiras-container"></div>
+    <h2>Lista de Gastos</h2>
+    <div class="cards-container" id="gastos-container"></div>
   </div>
 
   <footer>
-    <p>&copy; 2025 Lava-Rápido Manager</p>
+    <p>&copy; 2025 Lava-Rápido</p>
   </footer>
-
-  <script type="module" src="/js/empresa-parceira.js"></script>
+  <script type="module" src="/js/gastos.js"></script>
 </body>
 </html>

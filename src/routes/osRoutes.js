@@ -1,4 +1,4 @@
-import express from 'express';
+import { Router } from "express";
 import {
   getTodasOS,
   getOSById,
@@ -6,16 +6,19 @@ import {
   atualizarOS,
   deletarOS,
   patchStatus
-} from '../controllers/osController.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+} from "../controllers/osController.js";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
-const router = express.Router();
+const router = Router();
 
-router.get('/',    authMiddleware, getTodasOS);
-router.get('/:id', authMiddleware, getOSById);
-router.post('/',   authMiddleware, criarOS);
-router.put('/:id', authMiddleware, atualizarOS);
-router.delete('/:id', authMiddleware, deletarOS);
-router.patch('/:id/status', authMiddleware, patchStatus);
+// Todas as rotas de OS exigem autenticação
+router.use(authMiddleware);
+
+router.get("/",    getTodasOS);             // GET /api/os
+router.get("/:id", getOSById);              // GET /api/os/:id
+router.post("/",   criarOS);                // POST /api/os
+router.put("/:id", atualizarOS);             // PUT /api/os/:id
+router.delete("/:id", deletarOS);             // DELETE /api/os/:id
+router.patch("/:id/status", patchStatus);   // PATCH /api/os/:id/status
 
 export default router;

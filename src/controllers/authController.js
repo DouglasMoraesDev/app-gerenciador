@@ -1,11 +1,20 @@
-// src/controllers/authController.js
 import prisma from "../prismaClient.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { validarEmail } from "../utils/validators.js";
+
+// Controller de login e registro de usuários
 
 export async function login(req, res, next) {
   try {
     const { email, senha } = req.body;
+    if (!email || !senha) {
+      return res.status(400).json({ error: "E-mail e senha são obrigatórios." });
+    }
+    if (!validarEmail(email)) {
+      return res.status(400).json({ error: "E-mail inválido." });
+    }
+
     const usuario = await prisma.usuario.findUnique({ where: { email } });
     if (!usuario) {
       return res.status(401).json({ error: "Credenciais inválidas" });
@@ -16,8 +25,14 @@ export async function login(req, res, next) {
       return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
+    // Gerar token com id, email, nome e papel
     const token = jwt.sign(
-      { id: usuario.id, email: usuario.email, nome: usuario.nome },
+      {
+        id: usuario.id,
+        email: usuario.email,
+        nome: usuario.nome,
+        papel: usuario.papel
+      },
       process.env.JWT_SECRET,
       { expiresIn: "8h" }
     );
@@ -30,8 +45,16 @@ export async function login(req, res, next) {
 export async function register(req, res, next) {
   try {
     const { nome, email, senha } = req.body;
+    if (!nome || !email || !senha) {
+      return res.status(400).json({ error: "Nome, e-mail e senha são obrigatórios." });
+    }
+    if (!validarEmail(email)) {
+      return res.status(400).json({ error: "E-mail inválido." });
+    }
+    if (senha.length < 6) {
+      return res.status(400).json({ error: "Senha deve ter ao menos 6 caracteres." });
+    }
 
-    // Verifica se já existe
     const existing = await prisma.usuario.findUnique({ where: { email } });
     if (existing) {
       return res.status(409).json({ error: "E-mail já cadastrado." });

@@ -1,6 +1,4 @@
-// public/js/register.js
-
-import { BASE_URL, registerUser } from "./api.js";
+import { registerUser } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("register-form");
@@ -18,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       await registerUser({ nome, email, senha });
       window.location.href = "/login.html";
-
     } catch (err) {
       msgEl.textContent = err.message;
       msgEl.style.display = "block";

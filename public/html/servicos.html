@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clientes - Lava-Rápido</title>
+  <title>Serviços - Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -27,15 +27,33 @@
     </nav>
   </header>
   <script>
-    document.getElementById('menu-btn').addEventListener('click', () => {
-      document.getElementById('main-nav').classList.toggle('open');
+    document.getElementById("menu-btn").addEventListener("click", () => {
+      document.getElementById("main-nav").classList.toggle("open");
     });
   </script>
 
   <div class="container">
-    <h2>Clientes</h2>
-    <div id="cards-container" class="cards-container">
-      <!-- Cards serão inseridos aqui -->
+    <h2 id="form-title">Cadastrar Serviço</h2>
+    <form id="servico-form" data-edit-id="">
+      <div class="form-group">
+        <label for="nomeServ">Nome do Serviço:</label>
+        <input type="text" id="nomeServ" name="nome" required />
+      </div>
+      <div class="form-group">
+        <label for="descricaoServ">Descrição:</label>
+        <textarea id="descricaoServ" name="descricao" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label for="valorServ">Valor (R$):</label>
+        <input type="number" id="valorServ" name="valor" step="0.01" required />
+      </div>
+      <button type="submit" id="btn-submit">Salvar Serviço</button>
+      <p id="msg" style="color:red; margin-top:10px; display:none;"></p>
+    </form>
+
+    <h2 style="margin-top: 40px;">Lista de Serviços</h2>
+    <div id="servicos-cards" class="cards-container">
+      <!-- Cards de serviços serão inseridos aqui -->
     </div>
   </div>
 
@@ -50,6 +68,6 @@
     <p>&copy; 2025 Lava-Rápido</p>
   </footer>
 
-  <script type="module" src="/js/clientes-cards.js"></script>
+  <script type="module" src="/js/servicos-cards.js"></script>
 </body>
 </html>

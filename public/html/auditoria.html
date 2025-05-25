@@ -2,54 +2,77 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Auditoria - ADM Lava-Rápido</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auditoria - Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css"/>
 </head>
 <body>
   <header>
-    <h1>Auditoria</h1>
-   <button class="menu-btn" id="menu-btn">☰</button>
-      <nav id="main-nav">
-        <ul>
-          <li><a href="/dashboard.html">Home</a></li>
-          <li><a href="/os-list.html">Ordens do Dia</a></li>
-          <li><a href="/criar-os.html">Criar Ordem</a></li>
-          <li><a href="/caixa.html">Caixa</a></li>
-          <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
-          <li><a href="/clientes.html">Clientes</a></li>
-          <li><a href="/auditoria.html">Auditoria</a></li>
-          <li><a href="/estoque.html">Estoque</a></li>
-          <li><a href="/login.html" id="logout-btn">Sair</a></li>
-        </ul>
-      </nav>
-
+    <h1>Lava-Rápido</h1>
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <nav id="main-nav">
+      <ul>
+        <li><a href="/dashboard.html" class="active">Home</a></li>
+        <li><a href="/os-list.html">Ordens do Dia</a></li>
+        <li><a href="/criar-os.html">Criar Ordem</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+        <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="/servicos.html">Serviços</a></li>
+        <li><a href="/auditoria.html">Auditoria</a></li>
+        <li><a href="/gastos.html">Gastos</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
+      </ul>
+    </nav>
   </header>
-
   <script>
-    document.getElementById('menu-btn').addEventListener('click', () => {
-      document.getElementById('main-nav').classList.toggle('open');
-    });
+    document.getElementById('menu-btn')
+      .addEventListener('click', () => document.getElementById('main-nav').classList.toggle('open'));
   </script>
-    </body>
-  </header>
 
   <div class="container">
-
     <h2>Auditoria</h2>
-    <div class="form-group">
-      <label for="mes">Selecione o mês</label>
-      <input type="month" id="mes" required />
+
+    <!-- Cards de Acesso Rápido -->
+    <div class="cards-container">
+      <div class="card" id="card-entradas">
+        <h3>Entradas</h3>
+        <p>Clique para abrir</p>
+      </div>
+      <div class="card" id="card-saidas">
+        <h3>Saídas</h3>
+        <p>Clique para abrir</p>
+      </div>
+      <div class="card" id="card-gerar">
+        <h3>Gerar PDF</h3>
+        <p>Selecione mês/ano abaixo</p>
+      </div>
     </div>
-    <button id="btn-auditar">Gerar Relatório</button>
-    <div id="relatorio"></div>
+
+    <!-- Filtros para relatórios -->
+    <div id="filtros" style="margin-top:20px; text-align:center;">
+      <input type="month"   id="mes" style="margin-right:10px;"/>
+      <button id="btn-mes">Relatório Mensal</button>
+      <input type="number"  id="ano" placeholder="YYYY" min="2000" max="2100" style="margin:0 10px; width:80px;"/>
+      <button id="btn-ano">Relatório Anual</button>
+    </div>
   </div>
 
-  <footer>…</footer>
-  <script type="module" src="/js/auditoria.js"></script>
+  <!-- Modal único para detalhes e PDF -->
+  <div id="audit-modal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span id="audit-close" class="modal-close">&times;</span>
+      <h3 id="audit-title">Título</h3>
+      <div id="audit-body" style="max-height:400px; overflow-y:auto; margin-bottom:15px;"></div>
+      <button id="baixar-pdf">Baixar PDF</button>
+    </div>
+  </div>
 
-    <footer>
-    <p>&copy; 2025 Lava-Rápido</p>
+  <footer>
+    <p>&copy; 2025 Lava-Rápido Manager</p>
   </footer>
+
+  <script type="module" src="/js/auditoria.js"></script>
 </body>
 </html>

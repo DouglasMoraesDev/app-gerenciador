@@ -1,4 +1,4 @@
-// Funções utilitárias, ex.: formatação de datas ou moedas.
+// Funções de formatação de datas e moeda
 
 export function formatarDataHora(date) {
   const d = new Date(date);
