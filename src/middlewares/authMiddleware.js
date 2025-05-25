@@ -1,3 +1,5 @@
+// src/middlewares/authMiddleware.js
+
 import jwt from "jsonwebtoken";
 
 // Middleware para proteger rotas
@@ -12,10 +14,10 @@ export function authMiddleware(req, res, next) {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     // Injetar dados do usuário autenticado em req.usuario
     req.usuario = {
-      id: payload.id,
-      email: payload.email,
-      nome: payload.nome,
-      papel: payload.papel
+      id: payload.id,       // usar payload.id
+      email: payload.email, // usar payload.email
+      nome: payload.nome,   // usar payload.nome
+      papel: payload.papel  // usar payload.papel
     };
     next();
   } catch (err) {

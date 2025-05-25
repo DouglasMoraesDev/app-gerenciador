@@ -12,6 +12,9 @@ import caixaRoutes from "./routes/caixaRoutes.js";
 import gastosRoutes from "./routes/gastosRoutes.js";
 import auditoriaRoutes from "./routes/auditoriaRoutes.js";
 import parceriaRoutes from "./routes/parceiraRoutes.js";
+import usuarioRoutes from "./routes/usuarioRoutes.js";    // ← adicione esta linha
+import backupRoutes from "./routes/backupRoutes.js";      // ← e esta, se ainda não tiver
+
 import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -56,7 +59,6 @@ app.use(express.static(path.join(process.cwd(), "public/html")));
 app.use("/css", express.static(path.join(process.cwd(), "public/css")));
 app.use("/js",  express.static(path.join(process.cwd(), "public/js")));
 
-// **Uploads de PDFs de contrato**
 // Expondo a pasta `uploads` via URL pública /uploads
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
@@ -69,6 +71,8 @@ app.use("/api/caixa",     caixaRoutes);
 app.use("/api/gastos",    gastosRoutes);
 app.use("/api/auditoria", auditoriaRoutes);
 app.use("/api/parceiras", parceriaRoutes);
+app.use("/api/usuario",   usuarioRoutes);   // ← aqui fica definido
+app.use("/api/backup",    backupRoutes);    // ← e aqui
 
 // Middleware global de erro
 app.use(errorHandler);

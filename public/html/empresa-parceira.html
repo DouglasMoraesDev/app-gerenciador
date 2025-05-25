@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Empresas Parceiras - Lava-Rápido Manager</title>
   <link rel="stylesheet" href="/css/styles.css"/>
+
+  <!-- jsPDF via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
   <header>
@@ -27,8 +30,8 @@
     </nav>
   </header>
   <script>
-    document.getElementById('menu-btn').addEventListener('click', () => {
-      document.getElementById('main-nav').classList.toggle('open');
+    document.getElementById("menu-btn").addEventListener("click", () => {
+      document.getElementById("main-nav").classList.toggle("open");
     });
   </script>
 
@@ -38,7 +41,6 @@
     <section class="form-section">
       <h3 id="form-title">Cadastrar Nova Parceira</h3>
       <form id="empresa-form" enctype="multipart/form-data">
-        <!-- campo oculto para ID em modo edição -->
         <input type="hidden" id="parceira-id" name="id"/>
         <div class="form-group">
           <label for="nome">Nome da Empresa</label>
@@ -68,11 +70,11 @@
 
     <h3>Lista de Parceiras</h3>
     <div class="cards-container" id="parceiras-container">
-      <!-- cards serão inseridos aqui via JS -->
+      <!-- Os cards serão inseridos aqui via JS -->
     </div>
   </div>
 
-  <!-- Modal de detalhes -->
+  <!-- Modal de detalhes (permanece inalterado) -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <span id="modal-close" class="modal-close">&times;</span>

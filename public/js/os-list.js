@@ -1,3 +1,5 @@
+// public/js/os-list.js
+
 import { getOrdens, changeStatus } from "./api.js";
 
 const filtro             = document.getElementById("filtroStatus");
@@ -49,7 +51,7 @@ statusSelect.addEventListener("change", async () => {
   if (statusSelect.value === "ENTREGUE") {
     labelPagamento.style.display   = "block";
     pagamentoSelect.style.display = "block";
-    pagamentoSelect.value          = "PIX";
+    pagamentoSelect.value         = "PIX";
     finalizarBtn.disabled          = false;
   } else {
     labelPagamento.style.display   = "none";
@@ -73,9 +75,7 @@ finalizarBtn.addEventListener("click", async () => {
 
   try {
     await changeStatus(currentOs.id, "ENTREGUE", pagamentoSelect.value);
-    // Recarrega TODAS as ordens para atualizar status em todos os cards
     await load();
-    // Opcional: reabrir modal travado
     openModal({ ...currentOs, status: "ENTREGUE", modalidadePagamento: pagamentoSelect.value });
   } catch (err) {
     alert("Erro ao finalizar: " + err.message);
@@ -88,15 +88,25 @@ finalizarBtn.addEventListener("click", async () => {
 // Renderiza os cards
 function renderCards(list) {
   container.innerHTML = "";
+
   list.forEach(os => {
     const card = document.createElement("div");
     card.className = "card";
+
+    // 1) Se vier os.parceiro (incluído no include do back-end), mostramos o nome.
+    //    Caso contrário, mostramos “Serviço direto”.
+    const parceiroInfo = os.parceiro
+      ? `<p><strong>Empresa Parceira:</strong> ${os.parceiro.nome}</p>`
+      : `<p><strong>Empresa Parceira:</strong> — Serviço direto —</p>`;
+
     card.innerHTML = `
       <h3>OS #${os.id}: ${os.servico.nome}</h3>
       <p><strong>Cliente:</strong> ${os.cliente.nome}</p>
+      ${parceiroInfo}
       <p><strong>Status:</strong> ${os.status}</p>
       <p><strong>Valor:</strong> R$ ${os.valorServico.toFixed(2)}</p>
     `;
+
     card.addEventListener("click", () => openModal(os));
     container.appendChild(card);
   });

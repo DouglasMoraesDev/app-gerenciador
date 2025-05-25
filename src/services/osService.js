@@ -1,22 +1,25 @@
+// src/services/osService.js
+
 import prisma from "../prismaClient.js";
 import { ModalidadePagamento, StatusOS } from "@prisma/client";
 
 /**
  * Retorna todas as ordens de serviço,
- * incluindo dados de cliente e serviço.
+ * incluindo dados de cliente, serviço e parceiro (se houver).
  */
 async function getTodas() {
   return prisma.ordemServico.findMany({
     include: {
       cliente: true,
       servico: true,
-      finalizadoPor: true
-    }
+      finalizadoPor: true,
+      parceiro: true, // inclui dados da empresa parceira
+    },
   });
 }
 
 /**
- * Retorna uma OS pelo ID, com cliente e serviço.
+ * Retorna uma OS pelo ID, com cliente, serviço e parceiro.
  */
 async function getPorId(id) {
   return prisma.ordemServico.findUnique({
@@ -24,13 +27,15 @@ async function getPorId(id) {
     include: {
       cliente: true,
       servico: true,
-      finalizadoPor: true
-    }
+      finalizadoPor: true,
+      parceiro: true, // inclui dados da empresa parceira
+    },
   });
 }
 
 /**
  * Cria uma nova OS, copiando descrição e valor do serviço.
+ * Agora também aceita parceiroId (opcional) para associar à empresa parceira.
  */
 async function criar(dados) {
   // Fetch do serviço para copiar descrição e valor
@@ -39,38 +44,50 @@ async function criar(dados) {
     throw Object.assign(new Error("Serviço não encontrado."), { status: 404 });
   }
 
+  // Monta o objeto "data" para criar a OS, incluindo parceiro se fornecido
+  const dataCriacao = {
+    cliente: { connect: { id: dados.clienteId } },
+    servico: { connect: { id: dados.servicoId } },
+    descricaoServico: servico.descricao,
+    valorServico: servico.valor,
+    status: StatusOS.PENDENTE,
+  };
+
+  // Se vier parceiroId válido, conecta a empresa parceira
+  if (dados.parceiroId) {
+    dataCriacao.parceiro = { connect: { id: Number(dados.parceiroId) } };
+  }
+
   return prisma.ordemServico.create({
-    data: {
-      cliente: { connect: { id: dados.clienteId } },
-      servico: { connect: { id: dados.servicoId } },
-      descricaoServico: servico.descricao,
-      valorServico: servico.valor,
-      status: StatusOS.PENDENTE
-    },
+    data: dataCriacao,
     include: {
       cliente: true,
-      servico: true
-    }
+      servico: true,
+      parceiro: true, // retorna dados da empresa parceira
+    },
   });
 }
 
 /**
- * Atualiza OS (exceto finalização/pagamento).
+ * Atualiza OS (exceto finalização/pagamento). Manter lógica anterior.
  */
 async function atualizar(id, dados) {
   return prisma.ordemServico.update({
     where: { id },
     data: {
-      // Caso queira permitir alterar somente descrição/valor, descomente e ajuste:
+      status: dados.status,
+      // se quiser permitir editar descrição/valor, descomente:
       // descricaoServico: dados.descricaoServico,
-      // valorServico: dados.valorServico
-      status: dados.status
+      // valorServico: dados.valorServico,
+      // permitir editar parceiro se necessário:
+      // parceiroId: dados.parceiroId ? Number(dados.parceiroId) : null,
     },
     include: {
       cliente: true,
       servico: true,
-      finalizadoPor: true
-    }
+      finalizadoPor: true,
+      parceiro: true,
+    },
   });
 }
 
@@ -83,58 +100,49 @@ async function deletar(id) {
 
 /**
  * Atualiza apenas o status e registra finalização no caixa.
- * Se status == ENTREGUE, registra movimentação de entrada no caixa.
  */
 async function patchStatus(id, status, modalidadePagamento, usuarioId) {
-  // Validar status
   if (!Object.values(StatusOS).includes(status)) {
     throw Object.assign(new Error("Status inválido."), { status: 400 });
   }
 
-  // Atualizar status e setar pagamento caso ENTREGUE
   const osAtualizada = await prisma.ordemServico.update({
     where: { id },
     data: {
       status,
       modalidadePagamento: status === StatusOS.ENTREGUE ? modalidadePagamento : null,
-      finalizadoPor: status === StatusOS.ENTREGUE ? { connect: { id: usuarioId } } : undefined
+      finalizadoPor: status === StatusOS.ENTREGUE ? { connect: { id: usuarioId } } : undefined,
     },
     include: {
       cliente: true,
       servico: true,
       finalizadoPor: true,
-      movCaixa: true
-    }
+      movCaixa: true,
+      parceiro: true, // inclui parceiro no retorno
+    },
   });
 
-  // Se foi entregue, registrar entrada no caixa
   if (status === StatusOS.ENTREGUE) {
-    // Obter caixa aberto
     const caixa = await prisma.caixa.findFirst({ where: { dataFechamento: null } });
     if (!caixa) {
       throw Object.assign(new Error("Nenhum caixa aberto para registrar entrada."), { status: 400 });
     }
-    // Registrar movimentação no caixa
     const mov = await prisma.caixaMov.create({
       data: {
         tipo: "ENTRADA",
         valor: osAtualizada.valorServico,
         usuario: { connect: { id: usuarioId } },
         caixa: { connect: { id: caixa.id } },
-        ordem: { connect: { id } }
-      }
+        ordem: { connect: { id } },
+      },
     });
-    // Atualizar soma de entradas no caixa
     await prisma.caixa.update({
       where: { id: caixa.id },
-      data: {
-        entradas: { increment: osAtualizada.valorServico }
-      }
+      data: { entradas: { increment: osAtualizada.valorServico } },
     });
-    // Vincular movCaixa na OS (caso necessário)
     await prisma.ordemServico.update({
       where: { id },
-      data: { movCaixa: { connect: { id: mov.id } } }
+      data: { movCaixa: { connect: { id: mov.id } } },
     });
   }
 
@@ -147,5 +155,5 @@ export default {
   criar,
   atualizar,
   deletar,
-  patchStatus
+  patchStatus,
 };

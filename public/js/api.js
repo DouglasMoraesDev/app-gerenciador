@@ -1,3 +1,5 @@
+// public/js/api.js
+
 // Detecta se estamos em ambiente de desenvolvimento (localhost) ou produção
 const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 
@@ -101,7 +103,6 @@ export async function excluirCliente(id) {
   }
 }
 
-
 // ================================
 // SERVIÇOS
 // ================================
@@ -168,8 +169,6 @@ export async function excluirServico(id) {
     throw new Error(erroJson.error || "Erro ao excluir serviço");
   }
 }
-
-
 
 // ================================
 // ORDENS DE SERVIÇO
@@ -333,38 +332,6 @@ export async function gerarRelatorio(periodo, valor) {
   return resp.json();
 }
 
-// ================================
-// EMPRESAS PARCEIRAS
-// ================================
-export async function getParceiras() {
-  const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/parceiras`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
-  if (!resp.ok) throw new Error("Erro ao buscar empresas parceiras");
-  return resp.json();
-}
-
-export async function criarParceira(formData) {
-  const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/parceiras`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}` },
-    body: formData     // FormData, não JSON
-  });
-  if (!resp.ok) {
-    const err = await resp.json().catch(() => ({}));
-    throw new Error(err.error || "Erro ao criar empresa parceira");
-  }
-  return resp.json();
-}
-
-
-/**
- * Busca movimentações em intervalo de datas.
- * @param {string} start — "YYYY-MM-DD"
- * @param {string} end   — "YYYY-MM-DD"
- */
 export async function getMovimentacoesRange(start, end) {
   const token = localStorage.getItem("token");
   const resp = await fetch(
@@ -378,7 +345,38 @@ export async function getMovimentacoesRange(start, end) {
   return resp.json();
 }
 
+// ================================
+// EMPRESAS PARCEIRAS
+// ================================
+export async function getParceiras() {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(`${BASE_URL}/api/parceiras`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) throw new Error("Erro ao buscar empresas parceiras");
+  return resp.json();
+}
 
+export async function criarParceira(formData) {
+  const token = localStorage.getItem("token");
+  const resp = await fetch(`${BASE_URL}/api/parceiras`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: formData // FormData, não JSON
+  });
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || "Erro ao criar empresa parceira");
+  }
+  return resp.json();
+}
+
+/**
+ * Busca ordens de serviço de um parceiro em intervalo de datas.
+ * @param {number|string} parceiroId — ID da empresa parceira
+ * @param {string} start — "YYYY-MM-DD"
+ * @param {string} end   — "YYYY-MM-DD"
+ */
 export async function getOSPorParceiro(parceiroId, start, end) {
   const token = localStorage.getItem("token");
   const resp = await fetch(

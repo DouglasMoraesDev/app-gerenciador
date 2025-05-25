@@ -1,3 +1,5 @@
+// src/controllers/osController.js
+
 import prisma from "../prismaClient.js";
 import osService from "../services/osService.js";
 import caixaService from "../services/caixaService.js";
@@ -5,7 +7,6 @@ import caixaService from "../services/caixaService.js";
 // GET /api/os
 export async function getTodasOS(req, res) {
   try {
-    // Inclui dados de cliente e serviço
     const lista = await osService.getTodas();
     res.json(lista);
   } catch (err) {
@@ -28,12 +29,13 @@ export async function getOSById(req, res) {
 // POST /api/os
 export async function criarOS(req, res) {
   try {
-    const { clienteId, servicoId } = req.body;
+    const { clienteId, servicoId, parceiroId } = req.body;
+    // Validações mínimas: clienteId e servicoId continuam obrigatórios
     if (!clienteId || !servicoId) {
       return res.status(400).json({ error: "Cliente e serviço são obrigatórios." });
     }
 
-    // Criar a OS via service (que copia descrição e valor do serviço)
+    // Passa todo o corpo para o service, que aceitará parceiroId opcional
     const novaOs = await osService.criar(req.body);
     res.status(201).json(novaOs);
   } catch (err) {
@@ -69,34 +71,73 @@ export async function patchStatus(req, res) {
   try {
     const { id } = req.params;
     const { status, modalidadePagamento } = req.body;
-    // Atualiza status e, se finalizada, registra movimentação no caixa
-    const osFinalizada = await osService.patchStatus(Number(id), status, modalidadePagamento, req.usuario.id);
+    const osFinalizada = await osService.patchStatus(
+      Number(id),
+      status,
+      modalidadePagamento,
+      req.usuario.id
+    );
     return res.json(osFinalizada);
   } catch (err) {
     return res.status(400).json({ error: err.message });
   }
 }
 
+/**
+ * GET /api/os/parceiro
+ * Query params: parceiroId (número), start (YYYY-MM-DD), end (YYYY-MM-DD)
+ */
 export async function getOSPorParceiro(req, res, next) {
   try {
-    const { parceiroId, start, end } = req.query;
-    if (!parceiroId || !start || !end) {
-      return res.status(400).json({ error: "Faltando parceiroId, start ou end" });
-    }
-    const dtStart = new Date(start);
-    const dtEnd   = new Date(end);
-    dtEnd.setHours(23,59,59,999);
+    const { parceiroId: pId, start, end } = req.query;
 
+    // 1) Validação básica dos parâmetros
+    if (!pId || !start || !end) {
+      return res
+        .status(400)
+        .json({ error: "É necessário fornecer parceiroId, start e end na query." });
+    }
+
+    // 2) Converter parceiroId para inteiro e validar
+    const parceiroId = parseInt(pId, 10);
+    if (isNaN(parceiroId)) {
+      return res.status(400).json({ error: "parceiroId deve ser um número inteiro." });
+    }
+
+    // 3) Converter datas
+    const dtStart = new Date(start);
+    const dtEnd = new Date(end);
+    if (isNaN(dtStart.getTime()) || isNaN(dtEnd.getTime())) {
+      return res
+        .status(400)
+        .json({ error: "start e end devem estar no formato YYYY-MM-DD válidos." });
+    }
+    // Ajusta hora do fim do dia para incluir todas as OS até 23:59:59
+    dtEnd.setHours(23, 59, 59, 999);
+
+    // 4) Verificar se a empresa parceira existe (opcional, mas ajuda a evitar busca inútil)
+    const parceiro = await prisma.empresaParceira.findUnique({
+      where: { id: parceiroId },
+    });
+    if (!parceiro) {
+      return res.status(404).json({ error: "Empresa parceira não encontrada." });
+    }
+
+    // 5) Buscar ordens de serviço filtrando por parceiroId e intervalo de datas
     const lista = await prisma.ordemServico.findMany({
       where: {
-        parceiroId: Number(parceiroId),
-        criadoEm: { gte: dtStart, lte: dtEnd }
+        parceiroId: parceiroId,
+        criadoEm: { gte: dtStart, lte: dtEnd },
       },
-      include: { cliente: true, servico: true }
+      include: {
+        cliente: true,
+        servico: true,
+      },
     });
-    res.json(lista);
+
+    return res.json(lista);
   } catch (err) {
-    next(err);
+    console.error("Erro em getOSPorParceiro:", err);
+    return res.status(500).json({ error: "Erro interno ao buscar OS do parceiro." });
   }
 }
-

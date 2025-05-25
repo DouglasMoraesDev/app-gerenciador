@@ -35,6 +35,7 @@
   <div class="container">
     <h2>Criar Ordem de Serviço</h2>
     <form id="criar-os-form">
+      <!-- Seleção de Cliente -->
       <div class="form-group">
         <label for="cliente">Pesquisar Cliente:</label>
         <input type="text" id="busca-cliente" placeholder="Digite nome do cliente..." />
@@ -43,6 +44,8 @@
           <!-- Será populado em JS -->
         </select>
       </div>
+
+      <!-- Seleção de Serviço -->
       <div class="form-group">
         <label for="servico">Selecionar Serviço:</label>
         <input type="text" id="busca-servico" placeholder="Digite nome do serviço..." />
@@ -51,6 +54,19 @@
           <!-- Será populado em JS -->
         </select>
       </div>
+
+      <!-- Seleção de Empresa Parceira (nova) -->
+      <div class="form-group">
+        <label for="parceiro">Empresa Parceira (opcional):</label>
+        <input type="text" id="busca-parceiro" placeholder="Digite nome da empresa parceira..." />
+        <select id="parceiroId" name="parceiroId">
+          <option value="">-- selecione empresa parceira --</option>
+          <!-- Será populado em JS -->
+        </select>
+        <small>Se esta ordem for para uma empresa parceira, selecione-a.</small>
+      </div>
+
+      <!-- Descrição e Valor (pré-preenchidos a partir do serviço) -->
       <div class="form-group">
         <label for="descricaoServico">Descrição do Serviço (Pré-preenchido):</label>
         <textarea id="descricaoServico" name="descricaoServico" rows="3" readonly></textarea>
@@ -59,6 +75,8 @@
         <label for="valorServico">Valor do Serviço (R$):</label>
         <input type="number" id="valorServico" name="valorServico" step="0.01" readonly />
       </div>
+
+      <!-- Status Inicial -->
       <div class="form-group">
         <label for="status">Status Inicial:</label>
         <select id="status" name="status" required>
@@ -67,6 +85,7 @@
           <option value="PRONTO">Pronto</option>
         </select>
       </div>
+
       <button type="submit">Criar Ordem</button>
     </form>
   </div>

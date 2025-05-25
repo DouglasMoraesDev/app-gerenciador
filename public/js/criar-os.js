@@ -1,6 +1,9 @@
+// public/js/criar-os.js
+
 import {
   getClientes,
   getServicos,
+  getParceiras,     // importar o helper para buscar empresas parceiras
   criarOrdem
 } from "./api.js";
 
@@ -12,8 +15,15 @@ const buscaServico = document.getElementById("busca-servico");
 const descricaoServicoEl = document.getElementById("descricaoServico");
 const valorServicoEl = document.getElementById("valorServico");
 
-// Carrega lista de clientes e serviços para os selects
+// **Novos elementos para Empresa Parceira**
+const parceiroSelect = document.getElementById("parceiroId");
+const buscaParceiro = document.getElementById("busca-parceiro");
+
+/**
+ * Carrega lista de clientes, serviços e parceiros para os selects
+ */
 async function loadDados() {
+  // Carrega clientes
   const clientes = await getClientes();
   clienteSelect.innerHTML = `<option value="">-- selecione cliente --</option>`;
   clientes.forEach(c => {
@@ -23,6 +33,7 @@ async function loadDados() {
     clienteSelect.appendChild(opt);
   });
 
+  // Carrega serviços
   const servicos = await getServicos();
   servicoSelect.innerHTML = `<option value="">-- selecione serviço --</option>`;
   servicos.forEach(s => {
@@ -30,6 +41,16 @@ async function loadDados() {
     opt.value = s.id;
     opt.textContent = `${s.nome} (R$ ${s.valor.toFixed(2)})`;
     servicoSelect.appendChild(opt);
+  });
+
+  // Carrega empresas parceiras
+  const parceiros = await getParceiras();
+  parceiroSelect.innerHTML = `<option value="">-- selecione empresa parceira --</option>`;
+  parceiros.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = `${p.nome} (R$ ${p.valorMensal.toFixed(2)}/mês)`;
+    parceiroSelect.appendChild(opt);
   });
 }
 
@@ -63,6 +84,21 @@ buscaServico.addEventListener("input", async () => {
     });
 });
 
+// **Filtragem ao digitar nome da empresa parceira**
+buscaParceiro.addEventListener("input", async () => {
+  const term = buscaParceiro.value.trim().toLowerCase();
+  const parceiros = await getParceiras();
+  parceiroSelect.innerHTML = `<option value="">-- selecione empresa parceira --</option>`;
+  parceiros
+    .filter(p => p.nome.toLowerCase().includes(term))
+    .forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = `${p.nome} (R$ ${p.valorMensal.toFixed(2)}/mês)`;
+      parceiroSelect.appendChild(opt);
+    });
+});
+
 // Ao selecionar um serviço, pré-preencher descrição e valor
 servicoSelect.addEventListener("change", async () => {
   const id = Number(servicoSelect.value);
@@ -85,6 +121,7 @@ form.addEventListener("submit", async e => {
   e.preventDefault();
   const clienteId = Number(form.clienteId.value);
   const servicoId = Number(form.servicoId.value);
+  const parceiroId = form.parceiroId.value ? Number(form.parceiroId.value) : null;
   const descricaoServico = form.descricaoServico.value.trim();
   const valorServico = parseFloat(form.valorServico.value);
   const status = form.status.value;
@@ -96,7 +133,12 @@ form.addEventListener("submit", async e => {
     return alert("Selecione um serviço.");
   }
 
+  // Monta objeto com dados, incluindo parceiroId apenas se selecionado
   const dados = { clienteId, servicoId, descricaoServico, valorServico, status };
+  if (parceiroId) {
+    dados.parceiroId = parceiroId;
+  }
+
   try {
     await criarOrdem(dados);
     alert("Ordem criada com sucesso!");
@@ -108,4 +150,5 @@ form.addEventListener("submit", async e => {
   }
 });
 
+// Ao carregar a página, busca clientes, serviços e parceiros
 document.addEventListener("DOMContentLoaded", loadDados);

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurações – Lava-Rápido</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Configurações</h1>
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <nav id="main-nav">
+      <ul>
+        <li><a href="/dashboard.html">Home</a></li>
+        <li><a href="/os-list.html">Ordens</a></li>
+        <li><a href="/criar-os.html">Criar Ordem</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="/empresa-parceira.html">Parceiras</a></li>
+        <li><a href="/clientes.html">Clientes</a></li>
+        <li><a href="/servicos.html">Serviços</a></li>
+        <li><a href="/configuracao.html" class="active">Configurações</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
+      </ul>
+    </nav>
+  </header>
+  <script>
+    document.getElementById("menu-btn").addEventListener("click", () => {
+      document.getElementById("main-nav").classList.toggle("open");
+    });
+  </script>
+
+  <div class="container">
+
+    <!-- === 1. Dados do Perfil (Alterar Nome de Usuário) === -->
+    <section class="config-section">
+      <h2>Dados do Perfil</h2>
+      <form id="form-usuario">
+        <div class="form-group">
+          <label for="usuario-nome">Nome de Usuário</label>
+          <input type="text" id="usuario-nome" name="nome" required placeholder="Digite seu nome" />
+        </div>
+        <button type="submit">Salvar Alterações</button>
+        <div id="status-usuario" class="form-status"></div>
+      </form>
+    </section>
+    <hr/>
+
+    <!-- === 2. Alterar Senha === -->
+    <section class="config-section">
+      <h2>Alterar Senha</h2>
+      <form id="form-senha">
+        <div class="form-group">
+          <label for="senha-antiga">Senha Atual</label>
+          <input type="password" id="senha-antiga" name="senhaAntiga" required placeholder="Senha atual" />
+        </div>
+        <div class="form-group">
+          <label for="nova-senha">Nova Senha</label>
+          <input type="password" id="nova-senha" name="novaSenha" required placeholder="Nova senha" />
+        </div>
+        <div class="form-group">
+          <label for="confirma-senha">Confirme a Nova Senha</label>
+          <input type="password" id="confirma-senha" name="confirmaSenha" required placeholder="Confirme a nova senha" />
+        </div>
+        <button type="submit">Atualizar Senha</button>
+        <div id="status-senha" class="form-status"></div>
+      </form>
+    </section>
+    <hr/>
+
+    <!-- === 3. Backup de Dados === -->
+    <section class="config-section">
+      <h2>Backup de Dados</h2>
+      <p>Faça o backup completo do banco de dados e do código do app em um único arquivo JavaScript.</p>
+      <button id="btn-fazer-backup">Fazer Backup</button>
+      <div id="status-backup" class="form-status"></div>
+    </section>
+    <hr/>
+
+    <!-- === 4. Restaurar Backup === -->
+    <section class="config-section">
+      <h2>Restaurar Backup</h2>
+      <p>Selecione um arquivo de backup para restaurar todos os dados.</p>
+      <input type="file" id="input-restore" accept=".js" />
+      <button id="btn-restaurar-backup">Restaurar Backup</button>
+      <div id="status-restore" class="form-status"></div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Lava-Rápido</p>
+  </footer>
+
+  <script type="module" src="/js/configuracao.js"></script>
+</body>
+</html>

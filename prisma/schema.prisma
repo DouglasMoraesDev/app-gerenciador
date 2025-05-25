@@ -1,6 +1,4 @@
-// ----------------------
-// prisma/schema.prisma (corrigido)
-// ----------------------
+// prisma/schema.prisma
 
 datasource db {
   provider = "mysql"
@@ -44,9 +42,9 @@ model Usuario {
   criadoEm DateTime @default(now())
 
   caixas        Caixa[]        @relation("UsuarioCaixas")
-  movs          CaixaMov[] // movimentações lançadas pelo usuário
+  movs          CaixaMov[]     // movimentações lançadas pelo usuário
   osFinalizadas OrdemServico[] @relation("UsuarioFinalizacao")
-  gastos        Gasto[] // gastos lançados pelo usuário
+  gastos        Gasto[]        // gastos lançados pelo usuário
 }
 
 model Cliente {
@@ -83,7 +81,7 @@ model OrdemServico {
   servicoId Int
 
   descricaoServico String // cópia da descrição do serviço na criação
-  valorServico     Float // cópia do valor do serviço na criação
+  valorServico     Float  // cópia do valor do serviço na criação
 
   status       StatusOS @default(PENDENTE)
   criadoEm     DateTime @default(now())
@@ -99,6 +97,7 @@ model OrdemServico {
   movCaixa   CaixaMov? @relation(name: "OScaixa", fields: [movCaixaId], references: [id])
   movCaixaId Int?      @unique
 
+  // **Novo campo que relaciona a OS a uma EmpresaParceira (opcional)**
   parceiro   EmpresaParceira? @relation(fields: [parceiroId], references: [id])
   parceiroId Int?
 }
