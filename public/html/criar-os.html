@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Criar Ordem de Serviço - Lava-Rápido</title>
+  <title>Criar Ordem de Serviço – Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css"/>
 </head>
 <body>
@@ -16,9 +16,9 @@
         <li><a href="/os-list.html">Ordens do Dia</a></li>
         <li><a href="/criar-os.html">Criar Ordem</a></li>
         <li><a href="/caixa.html">Caixa</a></li>
-        <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+        <li><a href="/empresa-parceira.html">Empresas Parceiras</a></li>
         <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="/clientes.html">Clientes</a></li>
         <li><a href="/servicos.html">Serviços</a></li>
         <li><a href="/auditoria.html">Auditoria</a></li>
         <li><a href="/gastos.html">Gastos</a></li>
@@ -35,17 +35,17 @@
   <div class="container">
     <h2>Criar Ordem de Serviço</h2>
     <form id="criar-os-form">
-      <!-- Seleção de Cliente -->
+      <!-- ================= Carro em vez de Cliente ================= -->
       <div class="form-group">
-        <label for="cliente">Pesquisar Cliente:</label>
-        <input type="text" id="busca-cliente" placeholder="Digite nome do cliente..." />
-        <select id="clienteId" name="clienteId" required>
-          <option value="">-- selecione cliente --</option>
+        <label for="carro">Pesquisar Carro (placa, modelo ou proprietário):</label>
+        <input type="text" id="busca-carro" placeholder="Digite placa, modelo ou proprietário..." />
+        <select id="carroId" name="carroId" required>
+          <option value="">-- selecione carro --</option>
           <!-- Será populado em JS -->
         </select>
       </div>
 
-      <!-- Seleção de Serviço -->
+      <!-- ================= Serviço ================= -->
       <div class="form-group">
         <label for="servico">Selecionar Serviço:</label>
         <input type="text" id="busca-servico" placeholder="Digite nome do serviço..." />
@@ -55,28 +55,20 @@
         </select>
       </div>
 
-      <!-- Seleção de Empresa Parceira (nova) -->
-      <div class="form-group">
-        <label for="parceiro">Empresa Parceira (opcional):</label>
-        <input type="text" id="busca-parceiro" placeholder="Digite nome da empresa parceira..." />
-        <select id="parceiroId" name="parceiroId">
-          <option value="">-- selecione empresa parceira --</option>
-          <!-- Será populado em JS -->
-        </select>
-        <small>Se esta ordem for para uma empresa parceira, selecione-a.</small>
-      </div>
-
-      <!-- Descrição e Valor (pré-preenchidos a partir do serviço) -->
+      <!-- ================= Descrição ================= -->
       <div class="form-group">
         <label for="descricaoServico">Descrição do Serviço (Pré-preenchido):</label>
         <textarea id="descricaoServico" name="descricaoServico" rows="3" readonly></textarea>
       </div>
+
+      <!-- ================= Valor (EDITÁVEL) ================= -->
       <div class="form-group">
         <label for="valorServico">Valor do Serviço (R$):</label>
-        <input type="number" id="valorServico" name="valorServico" step="0.01" readonly />
+        <!-- Antes era readonly; agora deixaremos editável -->
+        <input type="number" id="valorServico" name="valorServico" step="0.01" required />
       </div>
 
-      <!-- Status Inicial -->
+      <!-- ================= Status Inicial ================= -->
       <div class="form-group">
         <label for="status">Status Inicial:</label>
         <select id="status" name="status" required>

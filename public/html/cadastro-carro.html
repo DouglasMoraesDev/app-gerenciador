@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clientes - Lava-Rápido</title>
+  <title>Cadastro de Cliente  Lava-Rapido</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -17,7 +17,7 @@
         <li><a href="/criar-os.html">Criar Ordem</a></li>
         <li><a href="/caixa.html">Caixa</a></li>
         <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
-        <li><a href="/cadastro-cliente.html">Cadastrar Cliente</a></li>
+        <li><a href="/cadastro-cliente.html">Cadastrar carros</a></li>
         <li><a href="clientes.html">Clientes</a></li>
         <li><a href="/servicos.html">Serviços</a></li>
         <li><a href="/auditoria.html">Auditoria</a></li>
@@ -33,23 +33,37 @@
   </script>
 
   <div class="container">
-    <h2>Clientes</h2>
-    <div id="cards-container" class="cards-container">
-      <!-- Cards serão inseridos aqui -->
-    </div>
-  </div>
-
-  <div id="modal" class="modal">
-    <div class="modal-content">
-      <span id="modal-close" class="modal-close">&times;</span>
-      <div id="modal-body"></div>
-    </div>
+    <h2 id="form-title">Cadastrar Cliente</h2>
+    <form id="cad-cliente-form" data-edit-id="">
+      <div class="form-group">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" name="nome" required />
+      </div>
+      <div class="form-group">
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" name="telefone" />
+      </div>
+      <div class="form-group">
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" name="email" />
+      </div>
+      <div class="form-group">
+        <label for="veiculo">Veículo:</label>
+        <input type="text" id="veiculo" name="veiculo" required />
+      </div>
+      <div class="form-group">
+        <label for="placa">Placa:</label>
+        <input type="text" id="placa" name="placa" required pattern="[A-Za-z0-9]{6,7}" />
+      </div>
+      <button type="submit" id="btn-submit">Cadastrar</button>
+      <p id="msg" style="color:red; margin-top:10px; display:none;"></p>
+    </form>
   </div>
 
   <footer>
     <p>&copy; 2025 Lava-Rápido</p>
   </footer>
 
-  <script type="module" src="/js/clientes-cards.js"></script>
+  <script type="module" src="/js/cadastro-cliente.js"></script>
 </body>
 </html>

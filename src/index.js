@@ -1,26 +1,30 @@
+// src/index.js
+
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
 
 import prisma from "./prismaClient.js";
-import authRoutes from "./routes/authRoutes.js";
-import clientesRoutes from "./routes/clientesRoutes.js";
+import authRoutes     from "./routes/authRoutes.js";
+import carRoutes      from "./routes/carRoutes.js";        // Nova rota de carros
 import servicosRoutes from "./routes/servicosRoutes.js";
-import osRoutes from "./routes/osRoutes.js";
-import caixaRoutes from "./routes/caixaRoutes.js";
-import gastosRoutes from "./routes/gastosRoutes.js";
+import osRoutes       from "./routes/osRoutes.js";
+import caixaRoutes    from "./routes/caixaRoutes.js";
+import gastosRoutes   from "./routes/gastosRoutes.js";
 import auditoriaRoutes from "./routes/auditoriaRoutes.js";
-import parceriaRoutes from "./routes/parceiraRoutes.js";
-import usuarioRoutes from "./routes/usuarioRoutes.js";    // ← adicione esta linha
-import backupRoutes from "./routes/backupRoutes.js";      // ← e esta, se ainda não tiver
+import parceriaRoutes  from "./routes/parceiraRoutes.js";
+import usuarioRoutes   from "./routes/usuarioRoutes.js";
+import backupRoutes    from "./routes/backupRoutes.js";
 
 import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
 const app = express();
 
-// Lista de origens permitidas
+// -------------------------------
+// Lista de origens permitidas para CORS
+// -------------------------------
 const allowedOrigins = [
   "http://localhost:3000",
   "https://app-gerenciador-production.up.railway.app"
@@ -38,13 +42,15 @@ app.use(cors({
   credentials: true
 }));
 
-// Preflight
+// Preflight (configuração opcional, mas garante que OPTIONS será atendido)
 app.options("*", cors());
 
-// Body parser para JSON
+// Body parser para JSON em todas as rotas
 app.use(express.json());
 
-// Health-check
+// -------------------------------
+// Endereço de health-check para monitoramento
+// -------------------------------
 app.get("/health", async (req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
@@ -54,29 +60,60 @@ app.get("/health", async (req, res) => {
   }
 });
 
-// Servir frontend estático
+// -------------------------------
+// Servir arquivos estáticos do frontend
+// -------------------------------
 app.use(express.static(path.join(process.cwd(), "public/html")));
 app.use("/css", express.static(path.join(process.cwd(), "public/css")));
 app.use("/js",  express.static(path.join(process.cwd(), "public/js")));
 
-// Expondo a pasta `uploads` via URL pública /uploads
+// Expor a pasta de uploads (contratos de parceiras, etc.)
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
+// -------------------------------
 // Rotas da API
-app.use("/api/auth",      authRoutes);
-app.use("/api/clientes",  clientesRoutes);
-app.use("/api/servicos",  servicosRoutes);
-app.use("/api/os",        osRoutes);
-app.use("/api/caixa",     caixaRoutes);
-app.use("/api/gastos",    gastosRoutes);
-app.use("/api/auditoria", auditoriaRoutes);
-app.use("/api/parceiras", parceriaRoutes);
-app.use("/api/usuario",   usuarioRoutes);   // ← aqui fica definido
-app.use("/api/backup",    backupRoutes);    // ← e aqui
+// -------------------------------
 
-// Middleware global de erro
+// Rotas de Autenticação (login / register)
+app.use("/api/auth", authRoutes);
+
+// ***********************************************
+// Substituímos "/api/clientes" por "/api/carros" *
+// ***********************************************
+app.use("/api/carros", carRoutes);
+
+// Rotas de Serviços
+app.use("/api/servicos", servicosRoutes);
+
+// Rotas de Ordens de Serviço
+app.use("/api/os", osRoutes);
+
+// Rotas de Caixa (abertura, fechamento, movimentações)
+app.use("/api/caixa", caixaRoutes);
+
+// Rotas de Gastos
+app.use("/api/gastos", gastosRoutes);
+
+// Rotas de Auditoria (relatórios resumido e intervalo)
+app.use("/api/auditoria", auditoriaRoutes);
+
+// Rotas de Empresas Parceiras
+app.use("/api/parceiras", parceriaRoutes);
+
+// Rotas de Usuário (me, update-nome, change-password)
+app.use("/api/usuario", usuarioRoutes);
+
+// Rotas de Backup (exportar / restaurar)
+app.use("/api/backup", backupRoutes);
+
+// -------------------------------
+// Middleware global de tratamento de erros
+// -------------------------------
 app.use(errorHandler);
 
+// -------------------------------
+// Iniciar servidor na porta configurada
+// -------------------------------
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

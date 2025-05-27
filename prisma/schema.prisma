@@ -47,16 +47,16 @@ model Usuario {
   gastos        Gasto[]        // gastos lançados pelo usuário
 }
 
-model Cliente {
-  id       Int      @id @default(autoincrement())
-  nome     String
-  telefone String?
-  email    String?
-  veiculo  String
-  placa    String   @unique
-  criadoEm DateTime @default(now())
+model Carro {
+  id          Int      @id @default(autoincrement())
+  proprietario String
+  telefone    String? 
+  email       String?
+  modelo      String?
+  placa       String   @unique
+  criadoEm    DateTime @default(now())
 
-  ordens OrdemServico[] // histórico de OS deste cliente
+  ordens OrdemServico[] // histórico de OS desse carro
 }
 
 model Servico {
@@ -72,9 +72,9 @@ model Servico {
 model OrdemServico {
   id Int @id @default(autoincrement())
 
-  // Relação com Cliente
-  cliente   Cliente @relation(fields: [clienteId], references: [id])
-  clienteId Int
+  // Relação com Carro (antes era Cliente)
+  carro   Carro? @relation(fields: [carroId], references: [id])
+  carroId Int? 
 
   // Relação com Serviço
   servico   Servico @relation(fields: [servicoId], references: [id])
@@ -94,10 +94,10 @@ model OrdemServico {
   modalidadePagamento ModalidadePagamento?
 
   // Relacionamento one-to-one com CaixaMov (entrada ao finalizar)
-  movCaixa   CaixaMov? @relation(name: "OScaixa", fields: [movCaixaId], references: [id])
+  movCaixa   CaixaMov? @relation("OScaixa", fields: [movCaixaId], references: [id])
   movCaixaId Int?      @unique
 
-  // **Novo campo que relaciona a OS a uma EmpresaParceira (opcional)**
+  // Empresa parceira (opcional)
   parceiro   EmpresaParceira? @relation(fields: [parceiroId], references: [id])
   parceiroId Int?
 }
@@ -130,11 +130,11 @@ model CaixaMov {
   caixaId Int
 
   // Se for entrada de OS finalizada (one-to-one)
-  ordem   OrdemServico? @relation(name: "OScaixa")
+  ordem   OrdemServico? @relation("OScaixa")
   ordemId Int?
 
   // Se for saída de Gasto (one-to-one)
-  gasto   Gasto? @relation(name: "GastoCaixa")
+  gasto   Gasto? @relation("GastoCaixa")
   gastoId Int?
 }
 
@@ -149,7 +149,7 @@ model Gasto {
   usuarioId Int
 
   // One-to-one com CaixaMov (saída)
-  movCaixa   CaixaMov? @relation(name: "GastoCaixa", fields: [movCaixaId], references: [id])
+  movCaixa   CaixaMov? @relation("GastoCaixa", fields: [movCaixaId], references: [id])
   movCaixaId Int?      @unique
 }
 

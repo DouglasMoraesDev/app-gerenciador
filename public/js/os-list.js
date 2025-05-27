@@ -18,7 +18,8 @@ let currentOs = null;
 function openModal(os) {
   currentOs = os;
   document.getElementById("modal-servico-nome").textContent = os.servico.nome;
-  document.getElementById("modal-cliente-nome").textContent = os.cliente.nome;
+  // Exibir placa e proprietário
+  document.getElementById("modal-carro-info").textContent = `${os.carro.placa} (${os.carro.proprietario})`;
   document.getElementById("modal-descricao").textContent    = os.descricaoServico;
   document.getElementById("modal-valor").textContent        = os.valorServico.toFixed(2);
   document.getElementById("modal-criado-em").textContent    = new Date(os.criadoEm).toLocaleString();
@@ -51,7 +52,7 @@ statusSelect.addEventListener("change", async () => {
   if (statusSelect.value === "ENTREGUE") {
     labelPagamento.style.display   = "block";
     pagamentoSelect.style.display = "block";
-    pagamentoSelect.value         = "PIX";
+    pagamentoSelect.value          = "PIX";
     finalizarBtn.disabled          = false;
   } else {
     labelPagamento.style.display   = "none";
@@ -88,25 +89,15 @@ finalizarBtn.addEventListener("click", async () => {
 // Renderiza os cards
 function renderCards(list) {
   container.innerHTML = "";
-
   list.forEach(os => {
     const card = document.createElement("div");
     card.className = "card";
-
-    // 1) Se vier os.parceiro (incluído no include do back-end), mostramos o nome.
-    //    Caso contrário, mostramos “Serviço direto”.
-    const parceiroInfo = os.parceiro
-      ? `<p><strong>Empresa Parceira:</strong> ${os.parceiro.nome}</p>`
-      : `<p><strong>Empresa Parceira:</strong> — Serviço direto —</p>`;
-
     card.innerHTML = `
       <h3>OS #${os.id}: ${os.servico.nome}</h3>
-      <p><strong>Cliente:</strong> ${os.cliente.nome}</p>
-      ${parceiroInfo}
+      <p><strong>Carro:</strong> ${os.carro.placa} (${os.carro.proprietario})</p>
       <p><strong>Status:</strong> ${os.status}</p>
       <p><strong>Valor:</strong> R$ ${os.valorServico.toFixed(2)}</p>
     `;
-
     card.addEventListener("click", () => openModal(os));
     container.appendChild(card);
   });

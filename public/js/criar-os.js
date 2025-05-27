@@ -1,39 +1,31 @@
 // public/js/criar-os.js
 
 import {
-  getClientes,
+  getCarros,
   getServicos,
-  getParceiras,     // importar o helper para buscar empresas parceiras
   criarOrdem
-} from "./api.js";
+} from "./api.js"; // certifique-se que api.js tenha getCarros()
 
 const form = document.getElementById("criar-os-form");
-const clienteSelect = document.getElementById("clienteId");
+const carroSelect = document.getElementById("carroId");
 const servicoSelect = document.getElementById("servicoId");
-const buscaCliente = document.getElementById("busca-cliente");
+const buscaCarro = document.getElementById("busca-carro");
 const buscaServico = document.getElementById("busca-servico");
 const descricaoServicoEl = document.getElementById("descricaoServico");
 const valorServicoEl = document.getElementById("valorServico");
 
-// **Novos elementos para Empresa Parceira**
-const parceiroSelect = document.getElementById("parceiroId");
-const buscaParceiro = document.getElementById("busca-parceiro");
-
-/**
- * Carrega lista de clientes, serviços e parceiros para os selects
- */
+// Carrega lista de carros e serviços para os selects
 async function loadDados() {
-  // Carrega clientes
-  const clientes = await getClientes();
-  clienteSelect.innerHTML = `<option value="">-- selecione cliente --</option>`;
-  clientes.forEach(c => {
+  const carros = await getCarros();
+  carroSelect.innerHTML = `<option value="">-- selecione carro --</option>`;
+  carros.forEach(c => {
     const opt = document.createElement("option");
+    // Exibe placa e proprietário: “ABC-1234 (João Silva)”
     opt.value = c.id;
-    opt.textContent = `${c.nome} (${c.veiculo} - ${c.placa})`;
-    clienteSelect.appendChild(opt);
+    opt.textContent = `${c.placa} (${c.proprietario})`;
+    carroSelect.appendChild(opt);
   });
 
-  // Carrega serviços
   const servicos = await getServicos();
   servicoSelect.innerHTML = `<option value="">-- selecione serviço --</option>`;
   servicos.forEach(s => {
@@ -42,30 +34,26 @@ async function loadDados() {
     opt.textContent = `${s.nome} (R$ ${s.valor.toFixed(2)})`;
     servicoSelect.appendChild(opt);
   });
-
-  // Carrega empresas parceiras
-  const parceiros = await getParceiras();
-  parceiroSelect.innerHTML = `<option value="">-- selecione empresa parceira --</option>`;
-  parceiros.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = `${p.nome} (R$ ${p.valorMensal.toFixed(2)}/mês)`;
-    parceiroSelect.appendChild(opt);
-  });
 }
 
-// Filtragem ao digitar nome do cliente
-buscaCliente.addEventListener("input", async () => {
-  const term = buscaCliente.value.trim().toLowerCase();
-  const clientes = await getClientes();
-  clienteSelect.innerHTML = `<option value="">-- selecione cliente --</option>`;
-  clientes
-    .filter(c => c.nome.toLowerCase().includes(term))
+// Filtragem ao digitar nome do carro (placa, modelo ou proprietário)
+buscaCarro.addEventListener("input", async () => {
+  const term = buscaCarro.value.trim().toLowerCase();
+  const carros = await getCarros();
+  carroSelect.innerHTML = `<option value="">-- selecione carro --</option>`;
+  carros
+    .filter(c => {
+      return (
+        c.placa.toLowerCase().includes(term) ||
+        (c.modelo && c.modelo.toLowerCase().includes(term)) ||
+        c.proprietario.toLowerCase().includes(term)
+      );
+    })
     .forEach(c => {
       const opt = document.createElement("option");
       opt.value = c.id;
-      opt.textContent = `${c.nome} (${c.veiculo} - ${c.placa})`;
-      clienteSelect.appendChild(opt);
+      opt.textContent = `${c.placa} (${c.proprietario})`;
+      carroSelect.appendChild(opt);
     });
 });
 
@@ -84,22 +72,8 @@ buscaServico.addEventListener("input", async () => {
     });
 });
 
-// **Filtragem ao digitar nome da empresa parceira**
-buscaParceiro.addEventListener("input", async () => {
-  const term = buscaParceiro.value.trim().toLowerCase();
-  const parceiros = await getParceiras();
-  parceiroSelect.innerHTML = `<option value="">-- selecione empresa parceira --</option>`;
-  parceiros
-    .filter(p => p.nome.toLowerCase().includes(term))
-    .forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = `${p.nome} (R$ ${p.valorMensal.toFixed(2)}/mês)`;
-      parceiroSelect.appendChild(opt);
-    });
-});
-
-// Ao selecionar um serviço, pré-preencher descrição e valor
+// Ao selecionar um serviço,
+// pré-preenche descrição e valor (que agora é editável)
 servicoSelect.addEventListener("change", async () => {
   const id = Number(servicoSelect.value);
   if (!id) {
@@ -110,7 +84,7 @@ servicoSelect.addEventListener("change", async () => {
   const s = await getServicos().then(list => list.find(x => x.id === id));
   if (s) {
     descricaoServicoEl.value = s.descricao;
-    valorServicoEl.value = s.valor.toFixed(2);
+    valorServicoEl.value = s.valor.toFixed(2); // preenche, mas usuário pode alterar
   } else {
     descricaoServicoEl.value = "";
     valorServicoEl.value = "";
@@ -119,26 +93,20 @@ servicoSelect.addEventListener("change", async () => {
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
-  const clienteId = Number(form.clienteId.value);
+  const carroId = Number(form.carroId.value);
   const servicoId = Number(form.servicoId.value);
-  const parceiroId = form.parceiroId.value ? Number(form.parceiroId.value) : null;
   const descricaoServico = form.descricaoServico.value.trim();
   const valorServico = parseFloat(form.valorServico.value);
   const status = form.status.value;
 
-  if (!clienteId) {
-    return alert("Selecione um cliente.");
+  if (!carroId) {
+    return alert("Selecione um carro.");
   }
   if (!servicoId) {
     return alert("Selecione um serviço.");
   }
 
-  // Monta objeto com dados, incluindo parceiroId apenas se selecionado
-  const dados = { clienteId, servicoId, descricaoServico, valorServico, status };
-  if (parceiroId) {
-    dados.parceiroId = parceiroId;
-  }
-
+  const dados = { carroId, servicoId, descricaoServico, valorServico, status };
   try {
     await criarOrdem(dados);
     alert("Ordem criada com sucesso!");
@@ -150,5 +118,4 @@ form.addEventListener("submit", async e => {
   }
 });
 
-// Ao carregar a página, busca clientes, serviços e parceiros
 document.addEventListener("DOMContentLoaded", loadDados);

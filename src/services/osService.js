@@ -10,11 +10,10 @@ import { ModalidadePagamento, StatusOS } from "@prisma/client";
 async function getTodas() {
   return prisma.ordemServico.findMany({
     include: {
-      cliente: true,
+      carro: true,
       servico: true,
-      finalizadoPor: true,
-      parceiro: true, // inclui dados da empresa parceira
-    },
+      finalizadoPor: true
+    }
   });
 }
 
@@ -25,11 +24,10 @@ async function getPorId(id) {
   return prisma.ordemServico.findUnique({
     where: { id },
     include: {
-      cliente: true,
+      carro: true,
       servico: true,
-      finalizadoPor: true,
-      parceiro: true, // inclui dados da empresa parceira
-    },
+      finalizadoPor: true
+    }
   });
 }
 
@@ -39,32 +37,29 @@ async function getPorId(id) {
  */
 async function criar(dados) {
   // Fetch do serviço para copiar descrição e valor
+  // Busca o serviço para obter a descrição
   const servico = await prisma.servico.findUnique({ where: { id: dados.servicoId } });
   if (!servico) {
     throw Object.assign(new Error("Serviço não encontrado."), { status: 404 });
   }
 
-  // Monta o objeto "data" para criar a OS, incluindo parceiro se fornecido
-  const dataCriacao = {
-    cliente: { connect: { id: dados.clienteId } },
-    servico: { connect: { id: dados.servicoId } },
-    descricaoServico: servico.descricao,
-    valorServico: servico.valor,
-    status: StatusOS.PENDENTE,
-  };
-
-  // Se vier parceiroId válido, conecta a empresa parceira
-  if (dados.parceiroId) {
-    dataCriacao.parceiro = { connect: { id: Number(dados.parceiroId) } };
-  }
+  // Se o front passou um valor personalizado (dados.valorServico), usamos ele
+  const valorFinal = typeof dados.valorServico === "number"
+    ? dados.valorServico
+    : servico.valor;
 
   return prisma.ordemServico.create({
-    data: dataCriacao,
-    include: {
-      cliente: true,
-      servico: true,
-      parceiro: true, // retorna dados da empresa parceira
+    data: {
+      carro: { connect: { id: dados.carroId } },       // conecta ao carro
+      servico: { connect: { id: dados.servicoId } },
+      descricaoServico: servico.descricao,
+      valorServico: valorFinal,
+      status: StatusOS.PENDENTE
     },
+    include: {
+      carro: true,
+      servico: true
+    }
   });
 }
 

@@ -1,11 +1,14 @@
 // public/js/api.js
 
 // Detecta se estamos em ambiente de desenvolvimento (localhost) ou produção
-const IS_LOCAL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const IS_LOCAL =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 
 export const BASE_URL = IS_LOCAL
   ? "http://localhost:3000"
   : "https://app-gerenciador-production.up.railway.app";
+
 
 // ================================
 // AUTENTICAÇÃO
@@ -36,30 +39,33 @@ export async function loginUser(email, senha) {
   return resp.json(); // retorna { token }
 }
 
+
 // ================================
-// CLIENTES
+// CARROS
 // ================================
-export async function getClientes() {
+// OBSERVAÇÃO: Removemos as funções de "Clientes" e substituímos pela rota /api/carros.
+// Toda operação sobre carros (listar, criar, atualizar, excluir) passa a ser feita aqui.
+export async function getCarros() {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/clientes`, {
+  const resp = await fetch(`${BASE_URL}/api/carros`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!resp.ok) throw new Error("Erro ao buscar clientes");
+  if (!resp.ok) throw new Error("Erro ao buscar carros");
   return resp.json();
 }
 
-export async function getClienteById(id) {
+export async function getCarroById(id) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/clientes/${id}`, {
+  const resp = await fetch(`${BASE_URL}/api/carros/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
-  if (!resp.ok) throw new Error("Cliente não encontrado");
+  if (!resp.ok) throw new Error("Carro não encontrado");
   return resp.json();
 }
 
-export async function criarCliente(dados) {
+export async function criarCarro(dados) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/clientes`, {
+  const resp = await fetch(`${BASE_URL}/api/carros`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -69,14 +75,14 @@ export async function criarCliente(dados) {
   });
   if (!resp.ok) {
     const erroJson = await resp.json();
-    throw new Error(erroJson.error || "Erro ao criar cliente");
+    throw new Error(erroJson.error || "Erro ao criar carro");
   }
   return resp.json();
 }
 
-export async function atualizarCliente(id, dados) {
+export async function atualizarCarro(id, dados) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/clientes/${id}`, {
+  const resp = await fetch(`${BASE_URL}/api/carros/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -86,25 +92,29 @@ export async function atualizarCliente(id, dados) {
   });
   if (!resp.ok) {
     const erroJson = await resp.json();
-    throw new Error(erroJson.error || "Erro ao atualizar cliente");
+    throw new Error(erroJson.error || "Erro ao atualizar carro");
   }
   return resp.json();
 }
 
-export async function excluirCliente(id) {
+export async function excluirCarro(id) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/clientes/${id}`, {
+  const resp = await fetch(`${BASE_URL}/api/carros/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) {
     const erroJson = await resp.json();
-    throw new Error(erroJson.error || "Erro ao excluir cliente");
+    throw new Error(erroJson.error || "Erro ao excluir carro");
   }
+  // DELETE costuma não retornar body; retornamos undefined
+  return;
 }
+
 
 // ================================
 // SERVIÇOS
+// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getServicos() {
   const token = localStorage.getItem("token");
@@ -168,10 +178,13 @@ export async function excluirServico(id) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao excluir serviço");
   }
+  return;
 }
+
 
 // ================================
 // ORDENS DE SERVIÇO
+// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getOrdens() {
   const token = localStorage.getItem("token");
@@ -225,8 +238,10 @@ export async function changeStatus(id, status, modalidadePagamento) {
   return resp.json();
 }
 
+
 // ================================
 // CAIXA
+// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getCaixaAtual() {
   const token = localStorage.getItem("token");
@@ -276,8 +291,10 @@ export async function getMovimentacoes() {
   return resp.json();
 }
 
+
 // ================================
 // GASTOS
+// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getGastos() {
   const token = localStorage.getItem("token");
@@ -315,16 +332,22 @@ export async function excluirGasto(id) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao excluir gasto");
   }
+  return;
 }
+
 
 // ================================
 // AUDITORIA
+// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function gerarRelatorio(periodo, valor) {
   const token = localStorage.getItem("token");
-  const resp = await fetch(`${BASE_URL}/api/auditoria?periodo=${periodo}&valor=${valor}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const resp = await fetch(
+    `${BASE_URL}/api/auditoria?periodo=${periodo}&valor=${valor}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
   if (!resp.ok) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao gerar relatório");
@@ -345,8 +368,10 @@ export async function getMovimentacoesRange(start, end) {
   return resp.json();
 }
 
+
 // ================================
 // EMPRESAS PARCEIRAS
+// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getParceiras() {
   const token = localStorage.getItem("token");
@@ -362,7 +387,7 @@ export async function criarParceira(formData) {
   const resp = await fetch(`${BASE_URL}/api/parceiras`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
-    body: formData // FormData, não JSON
+    body: formData, // FormData, não JSON
   });
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({}));

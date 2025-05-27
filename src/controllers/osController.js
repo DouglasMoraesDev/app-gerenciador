@@ -29,14 +29,16 @@ export async function getOSById(req, res) {
 // POST /api/os
 export async function criarOS(req, res) {
   try {
-    const { clienteId, servicoId, parceiroId } = req.body;
-    // Validações mínimas: clienteId e servicoId continuam obrigatórios
-    if (!clienteId || !servicoId) {
-      return res.status(400).json({ error: "Cliente e serviço são obrigatórios." });
+  const { carroId, servicoId, valorServico } = req.body;
+    if (!carroId || !servicoId) {
+      return res.status(400).json({ error: "Carro e serviço são obrigatórios." });
     }
 
-    // Passa todo o corpo para o service, que aceitará parceiroId opcional
-    const novaOs = await osService.criar(req.body);
+    const novaOs = await osService.criar({
+      carroId: Number(carroId),
+      servicoId: Number(servicoId),
+      valorServico: valorServico !== undefined ? parseFloat(valorServico) : undefined
+    });
     res.status(201).json(novaOs);
   } catch (err) {
     return res.status(400).json({ error: err.message });
