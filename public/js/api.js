@@ -9,7 +9,6 @@ export const BASE_URL = IS_LOCAL
   ? "http://localhost:3000"
   : "https://app-gerenciador-production.up.railway.app";
 
-
 // ================================
 // AUTENTICAÇÃO
 // ================================
@@ -39,12 +38,9 @@ export async function loginUser(email, senha) {
   return resp.json(); // retorna { token }
 }
 
-
 // ================================
 // CARROS
 // ================================
-// OBSERVAÇÃO: Removemos as funções de "Clientes" e substituímos pela rota /api/carros.
-// Toda operação sobre carros (listar, criar, atualizar, excluir) passa a ser feita aqui.
 export async function getCarros() {
   const token = localStorage.getItem("token");
   const resp = await fetch(`${BASE_URL}/api/carros`, {
@@ -107,14 +103,12 @@ export async function excluirCarro(id) {
     const erroJson = await resp.json();
     throw new Error(erroJson.error || "Erro ao excluir carro");
   }
-  // DELETE costuma não retornar body; retornamos undefined
+  // DELETE costuma não retornar body
   return;
 }
 
-
 // ================================
 // SERVIÇOS
-// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getServicos() {
   const token = localStorage.getItem("token");
@@ -181,10 +175,8 @@ export async function excluirServico(id) {
   return;
 }
 
-
 // ================================
 // ORDENS DE SERVIÇO
-// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getOrdens() {
   const token = localStorage.getItem("token");
@@ -238,10 +230,8 @@ export async function changeStatus(id, status, modalidadePagamento) {
   return resp.json();
 }
 
-
 // ================================
 // CAIXA
-// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getCaixaAtual() {
   const token = localStorage.getItem("token");
@@ -291,10 +281,8 @@ export async function getMovimentacoes() {
   return resp.json();
 }
 
-
 // ================================
 // GASTOS
-// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getGastos() {
   const token = localStorage.getItem("token");
@@ -335,10 +323,8 @@ export async function excluirGasto(id) {
   return;
 }
 
-
 // ================================
 // AUDITORIA
-// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function gerarRelatorio(periodo, valor) {
   const token = localStorage.getItem("token");
@@ -362,16 +348,14 @@ export async function getMovimentacoesRange(start, end) {
     { headers: { Authorization: `Bearer ${token}` } }
   );
   if (!resp.ok) {
-    const erro = await resp.json();
-    throw new Error(erro.error || "Erro ao buscar movimentações por intervalo");
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.error || "Erro ao buscar movimentações por intervalo");
   }
   return resp.json();
 }
 
-
 // ================================
 // EMPRESAS PARCEIRAS
-// (sem alterações aqui; mantido do jeito anterior)
 // ================================
 export async function getParceiras() {
   const token = localStorage.getItem("token");

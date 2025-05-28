@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gerenciar Carros</title>
+  <title>Gerenciar Carros – Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
@@ -12,76 +12,43 @@
     <button class="menu-btn" id="menu-btn">☰</button>
     <nav id="main-nav">
       <ul>
-        <li><a href="/dashboard.html">Home</a></li>
-        <!-- outros links -->
-        <li><a href="/carros.html" class="active">Carros</a></li>
-        <li><a href="/logout.html" id="logout-btn">Sair</a></li>
+        <li><a href="/dashboard.html" class="active">Home</a></li>
+        <li><a href="/os-list.html">Ordens do Dia</a></li>
+        <li><a href="/criar-os.html">Criar Ordem</a></li>
+        <li><a href="/caixa.html">Caixa</a></li>
+        <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
+        <li><a href="/cadastro-carro.html">Cadastrar Carros</a></li>
+        <li><a href="/carros.html">Carros</a></li>
+        <li><a href="/servicos.html">Serviços</a></li>
+        <li><a href="/auditoria.html">Auditoria</a></li>
+        <li><a href="/gastos.html">Gastos</a></li>
+        <li><a href="configuracao.html">Configurações</a></li>
+        <li><a href="/login.html" id="logout-btn">Sair</a></li>
       </ul>
     </nav>
   </header>
 
   <div class="container">
-    <!-- Botão “Novo Carro” -->
+    <!-- Botão para criar novo carro leva à página de cadastro -->
     <div style="margin-bottom: 16px;">
-      <button id="btn-novo-carro">+ Cadastrar Carro</button>
+      <a href="/cadastro-carros.html"><button id="btn-novo-carro">+ Novo Carro</button></a>
     </div>
 
     <!-- Container onde os cards de carro serão renderizados -->
     <div id="carros-container" class="cards-container"></div>
   </div>
 
-  <!-- Modal de cadastro/edição -->
-  <div id="modal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <span id="modal-close" class="modal-close">&times;</span>
-      <h3 id="form-title">Cadastrar Novo Carro</h3>
-      <form id="carro-form">
-        <!-- Campo escondido para armazenar o ID quando for edição -->
-        <input type="hidden" id="carro-id" />
-
-        <div class="form-group">
-          <label for="proprietario">Proprietário<span style="color:red;">*</span>:</label>
-          <input type="text" id="proprietario" name="proprietario" required />
-        </div>
-
-        <div class="form-group">
-          <label for="telefone">Telefone:</label>
-          <input type="text" id="telefone" name="telefone" placeholder="(99) 9 9999-9999" />
-        </div>
-
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input type="email" id="email" name="email" placeholder="opcional@example.com" />
-        </div>
-
-        <div class="form-group">
-          <label for="modelo">Modelo:</label>
-          <input type="text" id="modelo" name="modelo" />
-        </div>
-
-        <div class="form-group">
-          <label for="placa">Placa<span style="color:red;">*</span>:</label>
-          <input type="text" id="placa" name="placa" required maxlength="7" placeholder="ABC1D23" />
-        </div>
-
-        <div style="margin-top:12px; text-align:right;">
-          <button type="button" id="cancel-edit-btn" style="display:none; margin-right:8px;">Cancelar</button>
-          <button type="submit" id="submit-btn">Salvar Carro</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <footer>
-    <p>&copy; 2025 Lava-Rápido Manager</p>
+    <p>&copy; 2025 Lava-Rápido</p>
   </footer>
 
-  <script type="module" src="/js/carros.js"></script>
   <script>
     // Toggle menu (igual às outras páginas)
-    document.getElementById('menu-btn').addEventListener('click', () => {
-      document.getElementById('main-nav').classList.toggle('open');
-    });
+    document.getElementById('menu-btn')
+      .addEventListener('click', () =>
+        document.getElementById('main-nav').classList.toggle('open')
+      );
   </script>
+  <script type="module" src="/js/carros.js"></script>
 </body>
 </html>

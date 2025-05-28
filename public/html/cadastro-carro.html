@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cadastro de Cliente  Lava-Rapido</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastrar / Editar Carro – Lava-Rápido</title>
   <link rel="stylesheet" href="/css/styles.css" />
 </head>
 <body>
   <header>
-    <h1>Lava-Rápido</h1>
+    <h1>Cadastrar Carro</h1>
     <button class="menu-btn" id="menu-btn">☰</button>
     <nav id="main-nav">
       <ul>
@@ -17,46 +17,50 @@
         <li><a href="/criar-os.html">Criar Ordem</a></li>
         <li><a href="/caixa.html">Caixa</a></li>
         <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
-        <li><a href="/cadastro-cliente.html">Cadastrar carros</a></li>
-        <li><a href="clientes.html">Clientes</a></li>
+        <li><a href="/cadastro-carro.html">Cadastrar Carros</a></li>
+        <li><a href="/carros.html">Carros</a></li>
         <li><a href="/servicos.html">Serviços</a></li>
         <li><a href="/auditoria.html">Auditoria</a></li>
         <li><a href="/gastos.html">Gastos</a></li>
+        <li><a href="configuracao.html">Configurações</a></li>
         <li><a href="/login.html" id="logout-btn">Sair</a></li>
       </ul>
     </nav>
   </header>
-  <script>
-    document.getElementById('menu-btn').addEventListener('click', () => {
-      document.getElementById('main-nav').classList.toggle('open');
-    });
-  </script>
 
   <div class="container">
-    <h2 id="form-title">Cadastrar Cliente</h2>
-    <form id="cad-cliente-form" data-edit-id="">
+    <h2 id="form-title">Cadastrar Novo Carro</h2>
+    <form id="carro-form" data-edit-id="">
+      <!-- campo oculto para editar -->
+      <input type="hidden" id="carro-id" />
+
       <div class="form-group">
-        <label for="nome">Nome:</label>
-        <input type="text" id="nome" name="nome" required />
+        <label for="proprietario">Proprietário<span style="color:red;">*</span>:</label>
+        <input type="text" id="proprietario" name="proprietario" required />
       </div>
       <div class="form-group">
         <label for="telefone">Telefone:</label>
-        <input type="tel" id="telefone" name="telefone" />
+        <input type="text" id="telefone" name="telefone" placeholder="(99) 9 9999-9999" />
       </div>
       <div class="form-group">
-        <label for="email">E-mail:</label>
-        <input type="email" id="email" name="email" />
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" placeholder="opcional@example.com" />
       </div>
       <div class="form-group">
-        <label for="veiculo">Veículo:</label>
-        <input type="text" id="veiculo" name="veiculo" required />
+        <label for="modelo">Modelo:</label>
+        <input type="text" id="modelo" name="modelo" />
       </div>
       <div class="form-group">
-        <label for="placa">Placa:</label>
-        <input type="text" id="placa" name="placa" required pattern="[A-Za-z0-9]{6,7}" />
+        <label for="placa">Placa<span style="color:red;">*</span>:</label>
+        <input type="text" id="placa" name="placa" required maxlength="7" placeholder="ABC1D23" />
       </div>
-      <button type="submit" id="btn-submit">Cadastrar</button>
-      <p id="msg" style="color:red; margin-top:10px; display:none;"></p>
+
+      <div style="margin-top:12px; text-align:right;">
+        <button type="button" id="cancel-edit-btn" style="display:none; margin-right:8px;">
+          Cancelar
+        </button>
+        <button type="submit" id="submit-btn">Salvar Carro</button>
+      </div>
     </form>
   </div>
 
@@ -64,6 +68,13 @@
     <p>&copy; 2025 Lava-Rápido</p>
   </footer>
 
-  <script type="module" src="/js/cadastro-cliente.js"></script>
+  <script>
+    // Toggle menu
+    document.getElementById('menu-btn')
+      .addEventListener('click', () =>
+        document.getElementById('main-nav').classList.toggle('open')
+      );
+  </script>
+  <script type="module" src="/js/cadastro-carros.js"></script>
 </body>
 </html>
