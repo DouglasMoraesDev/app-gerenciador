@@ -1,5 +1,3 @@
-// src/controllers/carController.js
-
 import * as service from "../services/carService.js";
 
 export const listar = async (req, res, next) => {

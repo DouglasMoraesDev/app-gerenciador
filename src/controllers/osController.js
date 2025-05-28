@@ -1,5 +1,3 @@
-// src/controllers/osController.js
-
 import prisma from "../prismaClient.js";
 import osService from "../services/osService.js";
 import caixaService from "../services/caixaService.js";
@@ -29,7 +27,7 @@ export async function getOSById(req, res) {
 // POST /api/os
 export async function criarOS(req, res) {
   try {
-  const { carroId, servicoId, valorServico } = req.body;
+    const { carroId, servicoId, valorServico } = req.body;
     if (!carroId || !servicoId) {
       return res.status(400).json({ error: "Carro e serviço são obrigatórios." });
     }
@@ -50,7 +48,7 @@ export async function atualizarOS(req, res) {
   try {
     const { id } = req.params;
     const dados = req.body;
-    const os = await osService.atualizar(Number(id), dados);
+    const os   = await osService.atualizar(Number(id), dados);
     return res.json(os);
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -73,6 +71,7 @@ export async function patchStatus(req, res) {
   try {
     const { id } = req.params;
     const { status, modalidadePagamento } = req.body;
+    // req.usuario.id vem do authMiddleware
     const osFinalizada = await osService.patchStatus(
       Number(id),
       status,
@@ -81,43 +80,40 @@ export async function patchStatus(req, res) {
     );
     return res.json(osFinalizada);
   } catch (err) {
-    return res.status(400).json({ error: err.message });
+    // Se o service jogou um erro com `.status = 400` ou outro, retorna esse status
+    const statusCode = err.status || 500;
+    return res.status(statusCode).json({ error: err.message });
   }
 }
 
 /**
  * GET /api/os/parceiro
  * Query params: parceiroId (número), start (YYYY-MM-DD), end (YYYY-MM-DD)
+ * Retorna todas as OS de um parceiro num intervalo de datas.
  */
 export async function getOSPorParceiro(req, res, next) {
   try {
     const { parceiroId: pId, start, end } = req.query;
 
-    // 1) Validação básica dos parâmetros
     if (!pId || !start || !end) {
       return res
         .status(400)
         .json({ error: "É necessário fornecer parceiroId, start e end na query." });
     }
 
-    // 2) Converter parceiroId para inteiro e validar
     const parceiroId = parseInt(pId, 10);
     if (isNaN(parceiroId)) {
       return res.status(400).json({ error: "parceiroId deve ser um número inteiro." });
     }
 
-    // 3) Converter datas
     const dtStart = new Date(start);
-    const dtEnd = new Date(end);
+    const dtEnd   = new Date(end);
     if (isNaN(dtStart.getTime()) || isNaN(dtEnd.getTime())) {
-      return res
-        .status(400)
-        .json({ error: "start e end devem estar no formato YYYY-MM-DD válidos." });
+      return res.status(400).json({ error: "start e end devem estar no formato YYYY-MM-DD válidos." });
     }
-    // Ajusta hora do fim do dia para incluir todas as OS até 23:59:59
     dtEnd.setHours(23, 59, 59, 999);
 
-    // 4) Verificar se a empresa parceira existe (opcional, mas ajuda a evitar busca inútil)
+    // Verifica se a empresa parceira existe
     const parceiro = await prisma.empresaParceira.findUnique({
       where: { id: parceiroId },
     });
@@ -125,14 +121,14 @@ export async function getOSPorParceiro(req, res, next) {
       return res.status(404).json({ error: "Empresa parceira não encontrada." });
     }
 
-    // 5) Buscar ordens de serviço filtrando por parceiroId e intervalo de datas
+    // Busca as OS filtrando pelo parceiroId e período
     const lista = await prisma.ordemServico.findMany({
       where: {
-        parceiroId: parceiroId,
-        criadoEm: { gte: dtStart, lte: dtEnd },
+        parceiroId,
+        criadoEm: { gte: dtStart, lte: dtEnd }
       },
       include: {
-        cliente: true,
+        carro: true,
         servico: true,
       },
     });

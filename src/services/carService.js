@@ -1,5 +1,3 @@
-// src/services/carService.js
-
 import prisma from "../prismaClient.js";
 
 export const getTodosCarros = async () => {
@@ -19,8 +17,8 @@ export const criarCarro = async ({ proprietario, telefone, email, modelo, placa 
     data: {
       proprietario,
       telefone: telefone || null,
-      email: email || null,
-      modelo: modelo || null,
+      email:    email || null,
+      modelo:   modelo || null,
       placa
     }
   });

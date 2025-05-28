@@ -1,4 +1,4 @@
-/* ==========================================================================
+/* ========================================================================== 
    VARIÁVEIS GLOBAIS DE CORES
    ========================================================================== */
 :root {
@@ -15,8 +15,8 @@
   --color-shadow-hover: rgba(0, 0, 0, 0.15);
 }
 
-/* ==========================================================================
-   RESET E GLOBAL
+/* ========================================================================== 
+   RESET E ESTILOS GLOBAIS
    ========================================================================== */
 * {
   margin: 0;
@@ -39,7 +39,7 @@ a {
   color: inherit;
 }
 
-/* ==========================================================================
+/* ========================================================================== 
    HEADER & NAVEGAÇÃO
    ========================================================================== */
 header {
@@ -53,9 +53,12 @@ header {
   top: 0;
   z-index: 100;
 }
+
 header h1 {
   font-size: 1.4rem;
 }
+
+/* Botão de menu (aparece apenas em mobile) */
 .menu-btn {
   display: none;
   background: none;
@@ -64,27 +67,90 @@ header h1 {
   font-size: 1.5rem;
   cursor: pointer;
 }
-nav ul {
-  display: flex;
-  flex-wrap: wrap;
-  list-style: none;
-  justify-content: center;
-}
-nav ul li {
-  margin: 5px;
-}
-nav ul li a {
-  color: var(--color-header-text);
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background-color 0.2s ease;
-}
-nav ul li a:hover,
-nav ul li a.active {
-  background-color: var(--color-nav-hover);
-}
 
 /* ==========================================================================
+   NAV: COMPORTAMENTO RESPONSIVO
+   ========================================================================== */
+
+/* Telas pequenas (≤ 576px): nav oculto até clicar no menu-btn */
+@media (max-width: 576px) {
+  nav#main-nav {
+    display: none;             /* escondido por padrão */
+    position: absolute;
+    top: 100%;                 /* logo abaixo do header */
+    left: 0;
+    right: 0;
+    background: var(--color-header-bg);
+    flex-direction: column;
+    z-index: 150;
+  }
+  nav#main-nav.open {
+    display: flex;             /* mostra quando “.open” é adicionado */
+  }
+
+  nav#main-nav ul {
+    list-style: none;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  nav#main-nav ul li {
+    margin: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  nav#main-nav ul li a {
+    display: block;
+    padding: 12px 20px;
+    color: var(--color-header-text);
+    transition: background-color 0.2s ease;
+  }
+  nav#main-nav ul li a:hover,
+  nav#main-nav ul li a.active {
+    background-color: var(--color-nav-hover);
+  }
+
+  /* Mostra o botão de menu apenas no mobile */
+  .menu-btn {
+    display: block;
+  }
+}
+
+/* Telas médias/grandes (≥ 577px): nav sempre visível em linha e esconde menu-btn */
+@media (min-width: 577px) {
+  nav#main-nav {
+    display: flex !important;  /* forçar visível mesmo sem “.open” */
+    position: static;
+    background: transparent;
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto;
+  }
+
+  nav#main-nav ul {
+    display: flex;
+    gap: 10px;
+  }
+  nav#main-nav ul li {
+    margin: 0;
+  }
+  nav#main-nav ul li a {
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: var(--color-header-text);
+    transition: background-color 0.2s ease;
+  }
+  nav#main-nav ul li a:hover,
+  nav#main-nav ul li a.active {
+    background-color: var(--color-nav-hover);
+  }
+
+  /* Oculta o botão de menu no desktop */
+  .menu-btn {
+    display: none;
+  }
+}
+
+/* ========================================================================== 
    CONTAINER PRINCIPAL
    ========================================================================== */
 .container {
@@ -100,7 +166,7 @@ nav ul li a.active {
   margin-bottom: 20px;
 }
 
-/* ==========================================================================
+/* ========================================================================== 
    CARDS
    ========================================================================== */
 .cards-container {
@@ -155,8 +221,8 @@ nav ul li a.active {
   font-size: 0.95rem;
 }
 
-/* ==========================================================================
-   FORMULÁRIOS
+/* ========================================================================== 
+   FORMULÁRIOS E BOTÕES (APLICA-SE A TODOS)
    ========================================================================== */
 form,
 .form-section {
@@ -165,16 +231,22 @@ form,
   border-radius: 8px;
   box-shadow: 0 2px 6px var(--color-shadow);
   margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
+
 .form-group {
   margin-bottom: 15px;
 }
+
 label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
   font-size: 0.95rem;
 }
+
 input,
 textarea,
 select {
@@ -185,9 +257,6 @@ select {
   font-size: 1rem;
 }
 
-/* ==========================================================================
-   BOTÕES
-   ========================================================================== */
 button {
   padding: 10px 20px;
   border: none;
@@ -197,7 +266,8 @@ button {
   border-radius: 4px;
   font-size: 1rem;
   transition: background-color 0.2s ease;
-  margin: 0 10px 10px 0; /* espaçamento entre botões */
+  display: block;
+  margin: 20px auto 0 auto; /* centraliza o botão */
 }
 button:hover {
   background-color: var(--color-primary-hover);
@@ -207,22 +277,23 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ==========================================================================
-   TABELAS (opcional)
+/* ========================================================================== 
+   TABELAS (OPCIONAL)
    ========================================================================== */
 .table-wrapper {
   overflow-x: auto;
   background: var(--color-card-bg);
   padding: 10px;
   border-radius: 8px;
+  max-width: 100%;
+  margin-bottom: 20px;
 }
 
-/* ==========================================================================
-   MODAIS
+/* ========================================================================== 
+   MODAIS (APLICA-SE A TODOS)
    ========================================================================== */
 .modal {
   display: none;
-  /* os outros estilos que você já tem: */
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.5);
@@ -248,7 +319,7 @@ button:disabled {
   color: var(--color-text);
 }
 
-/* ==========================================================================
+/* ========================================================================== 
    FOOTER
    ========================================================================== */
 footer {
@@ -260,34 +331,101 @@ footer {
   margin-top: auto;
 }
 
-/* ==========================================================================
-   RESPONSIVIDADE MOBILE
+/* ========================================================================== 
+   RESPONSIVIDADE MOBILE (ADICIONAL)
    ========================================================================== */
 @media (max-width: 576px) {
   .menu-btn {
     display: block;
-  }
-  nav {
-    position: absolute;
-    top: 50px;
-    left: 0;
-    right: 0;
-    background: var(--color-header-bg);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-  }
-  nav.open {
-    display: flex;
-  }
-  nav ul {
-    flex-direction: column;
-  }
-  nav ul li {
-    margin: 10px 0;
   }
   .container {
     margin: 10px;
     padding: 0 10px;
   }
 }
+
+/* ========================================================================== 
+   PÁGINA: ORDENS DE SERVIÇO (os-list.html)
+   ========================================================================== */
+/* Centralizar barra de filtro */
+.filter-group {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  gap: 10px; /* espaço se houver múltiplos filtros */
+}
+
+/* ========================================================================== 
+   PÁGINA: CRIAR ORDEM (criar-os.html)
+   ========================================================================== */
+/* Agrupar pesquisa + seleção de carro com espaçamento */
+.order-form .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+/* Exemplo de uso no HTML:
+   <div class="form-row">
+     <div class="form-group">...</div>
+     <div class="form-group">...</div>
+   </div>
+*/
+/* Botão “Criar Ordem” já está centralizado por regra global de button */
+
+/* ========================================================================== 
+   PÁGINA: EMPRESAS PARCEIRAS (empresa-parceira.html)
+   ========================================================================== */
+/* Centralizar botão “Detalhes” dentro do card */
+.card .btn-detalhes {
+  display: block;
+  margin: 10px auto 0 auto;
+}
+
+/* ========================================================================== 
+   PÁGINA: LISTA DE CARROS (carros.html)
+   ========================================================================== */
+/* Centralizar botão “Excluir” dentro do modal de detalhe */
+#modal .modal-content button {
+  display: block;
+  margin: 20px auto 0 auto;
+}
+
+/* ========================================================================== 
+   PÁGINA: AUDITORIA (auditoria.html)
+   ========================================================================== */
+/* Container para inputs de data e botão “Gerar” */
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Botão “Gerar Relatório” */
+#btn-gerar {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Ajustar largura dos inputs para ficarem iguais e centralizados */
+.audit-filters input[type="date"] {
+  width: 200px;
+  max-width: 90%;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+/* ========================================================================== 
+   PÁGINA: GASTOS (gastos.html)
+   ========================================================================== */
+/* Centralizar botão “Registrar Gasto” (já coberto pelo estilo global de button) */
+
+/* ========================================================================== 
+   PÁGINA: CONFIGURAÇÕES (configuracao.html)
+   ========================================================================== */
+/* Centralizar botões de “Fazer Backup” e “Restaurar Backup” (já coberto pelo estilo global de button) */
