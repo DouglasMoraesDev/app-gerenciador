@@ -27,16 +27,26 @@ export async function getOSById(req, res) {
 // POST /api/os
 export async function criarOS(req, res) {
   try {
-    const { carroId, servicoId, valorServico } = req.body;
+    // EXTRAÍMOS parceiroId (opcional) do corpo
+    const { carroId, servicoId, valorServico, parceiroId } = req.body;
+
     if (!carroId || !servicoId) {
       return res.status(400).json({ error: "Carro e serviço são obrigatórios." });
     }
 
-    const novaOs = await osService.criar({
+    // Montamos o objeto que será enviado ao service
+    const dadosParaCriar = {
       carroId: Number(carroId),
       servicoId: Number(servicoId),
       valorServico: valorServico !== undefined ? parseFloat(valorServico) : undefined
-    });
+    };
+
+    // Se parceiroId foi enviado e não for vazio, já o incluímos
+    if (parceiroId) {
+      dadosParaCriar.parceiroId = Number(parceiroId);
+    }
+
+    const novaOs = await osService.criar(dadosParaCriar);
     res.status(201).json(novaOs);
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -128,8 +138,9 @@ export async function getOSPorParceiro(req, res, next) {
         criadoEm: { gte: dtStart, lte: dtEnd }
       },
       include: {
-        carro: true,
+        carro:   true,
         servico: true,
+        parceiro: true,         // incluir dados da empresa parceira também
       },
     });
 

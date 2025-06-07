@@ -2,20 +2,21 @@ import prisma from "../prismaClient.js";
 import { ModalidadePagamento, StatusOS } from "@prisma/client";
 
 /**
- * Retorna todas as ordens de serviço (do dia ou gerais), incluindo dados de carro, serviço e usuário que finalizou.
+ * Retorna todas as ordens de serviço (do dia ou gerais), incluindo dados de carro, serviço, usuário que finalizou e parceiro (se houver).
  */
 async function getTodas() {
   return prisma.ordemServico.findMany({
     include: {
-      carro:        true,   // antes era “cliente”
+      carro:        true,
       servico:      true,
-      finalizadoPor:true
+      finalizadoPor:true,
+      parceiro:     true    // incluir dados de parceiro (pode ser null)
     }
   });
 }
 
 /**
- * Retorna uma OS pelo ID, com carro, serviço, quem finalizou, etc.
+ * Retorna uma OS pelo ID, com carro, serviço, quem finalizou e parceiro (se houver).
  */
 async function getPorId(id) {
   return prisma.ordemServico.findUnique({
@@ -23,14 +24,16 @@ async function getPorId(id) {
     include: {
       carro:        true,
       servico:      true,
-      finalizadoPor:true
+      finalizadoPor:true,
+      parceiro:     true
     }
   });
 }
 
 /**
- * Cria uma nova OS, conectando ao carro e ao serviço.
+ * Cria uma nova OS, conectando ao carro, serviço e (opcionalmente) parceiro.
  * Se o front enviar um “valorServico” customizado, usa ele; senão, pega o valor do serviço.
+ * Se enviar “parceiroId”, conecta a OS a essa empresa parceira. Caso contrário, parceiro permanece null.
  */
 async function criar(dados) {
   // Busca o serviço para copiar descrição e valor padrão
@@ -39,22 +42,27 @@ async function criar(dados) {
     throw Object.assign(new Error("Serviço não encontrado."), { status: 404 });
   }
 
-  // Se o front passou valorServico (type number), usa esse valor, senão usa servico.valor
+  // Se o front passou valorServico (tipo number), usa esse valor; senão, usa servico.valor
   const valorFinal = typeof dados.valorServico === "number"
     ? dados.valorServico
     : servico.valor;
 
   return prisma.ordemServico.create({
     data: {
-      carro:             { connect: { id: dados.carroId } },
-      servico:           { connect: { id: dados.servicoId } },
-      descricaoServico:  servico.descricao,
-      valorServico:      valorFinal,
-      status:            StatusOS.PENDENTE
+      carro:            { connect: { id: dados.carroId } },
+      servico:          { connect: { id: dados.servicoId } },
+      descricaoServico: servico.descricao,
+      valorServico:     valorFinal,
+      status:           StatusOS.PENDENTE,
+      // Conecta a OS a uma empresa parceira, se foi passado parceiroId. Caso contrário, não inclui esse campo.
+      ...(dados.parceiroId
+        ? { parceiro: { connect: { id: dados.parceiroId } } }
+        : {})
     },
     include: {
-      carro:   true,
-      servico: true
+      carro:    true,
+      servico:  true,
+      parceiro: true   // já traz os dados da empresa parceira no retorno
     }
   });
 }
@@ -68,7 +76,7 @@ async function atualizar(id, dados) {
     where: { id },
     data: {
       status: dados.status,
-      // Se você quiser permitir edição de descrição/valor, descomente:
+      // Se quiser permitir edição de descrição/valor, descomente:
       // descricaoServico: dados.descricaoServico,
       // valorServico:     dados.valorServico,
       // Se quiser editar parceiro:

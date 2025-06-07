@@ -21,7 +21,10 @@ const modalClose = document.getElementById("modal-close");
 
 /**
  * Carrega e renderiza todos os parceiros.
- * Para cada parceiro, insere um <input type="month"> e o botão “Gerar Relatório Mensal”.
+ * Para cada parceiro, inserimos:
+ *  - um card com informações da parceira
+ *  - um <input type="month"> para escolher mês/ano
+ *  - botão "Gerar Relatório Mensal" com data-id e data-nome
  */
 async function loadParceiras() {
   container.innerHTML = "";
@@ -33,10 +36,10 @@ async function loadParceiras() {
     }
 
     list.forEach(e => {
-      // Para cada parceiro, criamos uma div.card com:
+      // Criamos uma div.card com:
       // - informações da parceira
       // - um <input type="month"> para escolher mês/ano
-      // - botão "Gerar Relatório Mensal"
+      // - botão "Gerar Relatório Mensal" (agora com data-nome)
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
@@ -47,7 +50,12 @@ async function loadParceiras() {
           <label for="mes-relatorio-${e.id}" style="font-size:0.9rem;">Mês/Ano:</label>
           <input type="month" id="mes-relatorio-${e.id}" name="mes-relatorio-${e.id}" style="margin-left:4px;" />
         </div>
-        <button class="btn-relatorio" data-id="${e.id}" style="margin-top:6px;">
+        <button 
+          class="btn-relatorio" 
+          data-id="${e.id}" 
+          data-nome="${e.nome}" 
+          style="margin-top:6px;"
+        >
           Gerar Relatório Mensal
         </button>
         <button class="btn-detalhes" data-id="${e.id}" style="margin-top:6px; margin-left:8px;">
@@ -66,10 +74,11 @@ async function loadParceiras() {
       });
     });
 
-    // Botão Relatório: usa o <input type="month"> ao lado para pegar mês/ano
+    // Botão Relatório: usa o <input type="month"> para pegar mês/ano e data-nome
     document.querySelectorAll(".btn-relatorio").forEach(btn => {
       btn.addEventListener("click", async () => {
         const parceiroId = btn.dataset.id;
+        const parceiroNome = btn.dataset.nome; // pegamos o nome diretamente do data-nome
         const inputMonth = document.getElementById(`mes-relatorio-${parceiroId}`);
         const valorMonth = inputMonth.value; // ex: "2025-05"
 
@@ -96,23 +105,25 @@ async function loadParceiras() {
           doc.setFontSize(14);
           doc.text("Relatório de Ordens de Serviço", 10, 20);
           doc.setFontSize(12);
-          doc.text(`Parceiro: ${list.find(p => p.id === Number(parceiroId)).nome}`, 10, 30);
+          // Usamos parceiroNome em vez de buscar na lista
+          doc.text(`Parceiro: ${parceiroNome}`, 10, 30);
           doc.text(`Período: ${start} até ${end}`, 10, 38);
 
-          // Corpo do relatório, incluindo veículo e placa em linha única,
-          // e serviço + valor na linha abaixo
+          // Corpo do relatório, agora referenciando os.carro em vez de os.cliente
           let yPos = 50;
           osList.forEach((os, i) => {
-            const cliente = os.cliente;
-            // Primeira linha: número, OS#, cliente, veículo e placa
+            const carro = os.carro || {};   // CORREÇÃO: usar os.carro
+            const servico = os.servico || {};
+
+            // Primeira linha: número, OS#, cliente (proprietário), veículo (modelo) e placa
             const linha1 =
-              `${i + 1}. OS#${os.id} – Cliente: ${cliente.nome} ` +
-              `(Veículo: ${cliente.veiculo} – Placa: ${cliente.placa})`;
+              `${i + 1}. OS#${os.id} – Cliente: ${carro.proprietario || 'N/A'} ` +
+              `(Veículo: ${carro.modelo || 'N/A'} – Placa: ${carro.placa || 'N/A'})`;
             doc.text(linha1, 10, yPos);
             yPos += 8;
 
             // Segunda linha: serviço e valor
-            const linha2 = `   Serviço: ${os.servico.nome} – Valor: R$${os.valorServico.toFixed(2)}`;
+            const linha2 = `   Serviço: ${servico.nome || 'N/A'} – Valor: R$${os.valorServico.toFixed(2)}`;
             doc.text(linha2, 10, yPos);
             yPos += 10; // espaço extra antes da próxima OS
 
@@ -136,7 +147,9 @@ async function loadParceiras() {
   }
 }
 
-// Abre modal com detalhes completos do parceiro
+/**
+ * Abre modal com detalhes completos do parceiro
+ */
 function openModal(e) {
   modalBody.innerHTML = `
     <h3>${e.nome}</h3>
@@ -172,7 +185,9 @@ function openModal(e) {
   });
 }
 
-// Inicia o modo de edição: preenche o formulário
+/**
+ * Inicia o modo de edição: preenche o formulário
+ */
 function startEdit(e) {
   formTitle.textContent = "Editar Parceira";
   submitBtn.textContent = "Atualizar";
@@ -205,7 +220,7 @@ form.addEventListener("submit", async e => {
   const data = new FormData(form);
   try {
     if (id) {
-      // atualizar via PUT
+      // atualizar via PUT (sem upload de PDF)
       const opts = {
         method: "PUT",
         body: JSON.stringify(Object.fromEntries(data.entries())),
@@ -214,7 +229,7 @@ form.addEventListener("submit", async e => {
       await fetch(`/api/parceiras/${id}`, opts);
       alert("Parceira atualizada!");
     } else {
-      // criar via multipart
+      // criar via multipart (FormData, permite upload de PDF)
       await criarParceira(data);
       alert("Parceira cadastrada!");
     }

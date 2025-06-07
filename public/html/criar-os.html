@@ -36,13 +36,13 @@
   <div class="container">
     <h2>Criar Ordem de Serviço</h2>
     <form id="criar-os-form">
-      <!-- ================= Carro em vez de Cliente ================= -->
+      <!-- ================= Carro ================= -->
       <div class="form-group">
         <label for="carro">Pesquisar Carro (placa, modelo ou proprietário):</label>
         <input type="text" id="busca-carro" placeholder="Digite placa, modelo ou proprietário..." />
         <select id="carroId" name="carroId" required>
           <option value="">-- selecione carro --</option>
-          <!-- Será populado em JS -->
+          <!-- Será populado dinamicamente em JS -->
         </select>
       </div>
 
@@ -52,7 +52,17 @@
         <input type="text" id="busca-servico" placeholder="Digite nome do serviço..." />
         <select id="servicoId" name="servicoId" required>
           <option value="">-- selecione serviço --</option>
-          <!-- Será populado em JS -->
+          <!-- Será populado dinamicamente em JS -->
+        </select>
+      </div>
+
+      <!-- ================ Empresa Parceira (opcional) ================ -->
+      <div class="form-group">
+        <label for="parceiro">Empresa Parceira (opcional):</label>
+        <input type="text" id="busca-parceiro" placeholder="Digite nome da empresa..." />
+        <select id="parceiroId" name="parceiroId">
+          <option value="">-- nenhuma parceira --</option>
+          <!-- Será populado dinamicamente em JS -->
         </select>
       </div>
 
@@ -65,7 +75,7 @@
       <!-- ================= Valor (EDITÁVEL) ================= -->
       <div class="form-group">
         <label for="valorServico">Valor do Serviço (R$):</label>
-        <!-- Antes era readonly; agora deixaremos editável -->
+        <!-- Antes era readonly; agora deixamos editável -->
         <input type="number" id="valorServico" name="valorServico" step="0.01" required />
       </div>
 
@@ -87,6 +97,7 @@
     <p>&copy; 2025 Lava-Rápido</p>
   </footer>
 
+  <!-- carrega script que contém loadDados(), listeners e submit do formulário -->
   <script type="module" src="/js/criar-os.js"></script>
 </body>
 </html>
