@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Criar Ordem de Serviço – Lava-Rápido</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Criar Ordem de Serviço</title>
   <link rel="stylesheet" href="/css/styles.css"/>
 </head>
 <body>
   <header>
-    <h1>Criar ordem de serviço Lava-Rápido</h1>
-    <button class="menu-btn" id="menu-btn">☰</button>
+    <h1>Criar Ordem de Serviço</h1>
+    <button class="menu-btn" id="menu-btn">☰ Menu</button>
     <nav id="main-nav">
       <ul>
         <li><a href="/dashboard.html" class="active">Home</a></li>
@@ -17,8 +17,6 @@
         <li><a href="/criar-os.html">Criar Ordem</a></li>
         <li><a href="/caixa.html">Caixa</a></li>
         <li><a href="empresa-parceira.html">Empresas Parceiras</a></li>
-        <li><a href="/cadastro-carro.html">Cadastrar Carros</a></li>
-        <li><a href="/carros.html">Carros</a></li>
         <li><a href="/servicos.html">Serviços</a></li>
         <li><a href="/auditoria.html">Auditoria</a></li>
         <li><a href="/gastos.html">Gastos</a></li>
@@ -28,76 +26,23 @@
     </nav>
   </header>
   <script>
-    document.getElementById('menu-btn').addEventListener('click', () => {
-      document.getElementById('main-nav').classList.toggle('open');
-    });
+    document.getElementById('menu-btn')
+      .addEventListener('click', ()=> document.getElementById('main-nav').classList.toggle('open'));
   </script>
-
   <div class="container">
-    <h2>Criar Ordem de Serviço</h2>
     <form id="criar-os-form">
-      <!-- ================= Carro ================= -->
-      <div class="form-group">
-        <label for="carro">Pesquisar Carro (placa, modelo ou proprietário):</label>
-        <input type="text" id="busca-carro" placeholder="Digite placa, modelo ou proprietário..." />
-        <select id="carroId" name="carroId" required>
-          <option value="">-- selecione carro --</option>
-          <!-- Será populado dinamicamente em JS -->
-        </select>
-      </div>
-
-      <!-- ================= Serviço ================= -->
-      <div class="form-group">
-        <label for="servico">Selecionar Serviço:</label>
-        <input type="text" id="busca-servico" placeholder="Digite nome do serviço..." />
-        <select id="servicoId" name="servicoId" required>
-          <option value="">-- selecione serviço --</option>
-          <!-- Será populado dinamicamente em JS -->
-        </select>
-      </div>
-
-      <!-- ================ Empresa Parceira (opcional) ================ -->
-      <div class="form-group">
-        <label for="parceiro">Empresa Parceira (opcional):</label>
-        <input type="text" id="busca-parceiro" placeholder="Digite nome da empresa..." />
-        <select id="parceiroId" name="parceiroId">
-          <option value="">-- nenhuma parceira --</option>
-          <!-- Será populado dinamicamente em JS -->
-        </select>
-      </div>
-
-      <!-- ================= Descrição ================= -->
-      <div class="form-group">
-        <label for="descricaoServico">Descrição do Serviço (Pré-preenchido):</label>
-        <textarea id="descricaoServico" name="descricaoServico" rows="3" readonly></textarea>
-      </div>
-
-      <!-- ================= Valor (EDITÁVEL) ================= -->
-      <div class="form-group">
-        <label for="valorServico">Valor do Serviço (R$):</label>
-        <!-- Antes era readonly; agora deixamos editável -->
-        <input type="number" id="valorServico" name="valorServico" step="0.01" required />
-      </div>
-
-      <!-- ================= Status Inicial ================= -->
-      <div class="form-group">
-        <label for="status">Status Inicial:</label>
-        <select id="status" name="status" required>
-          <option value="PENDENTE">Pendente</option>
-          <option value="EM_ANDAMENTO">Em Andamento</option>
-          <option value="PRONTO">Pronto</option>
-        </select>
-      </div>
-
+      <label>Placa:</label>
+      <input name="plate" required />
+      <label>Modelo:</label>
+      <input name="model" required />
+      <label>Empresa Parceira (opcional):</label>
+      <select name="parceiroId"><option value="">-- Nenhuma --</option></select>
+      <h3>Serviços</h3>
+      <div id="itens-container"></div>
+      <button type="button" id="add-item">+ Adicionar serviço</button>
       <button type="submit">Criar Ordem</button>
     </form>
   </div>
-
-  <footer>
-    <p>&copy; 2025 Lava-Rápido</p>
-  </footer>
-
-  <!-- carrega script que contém loadDados(), listeners e submit do formulário -->
   <script type="module" src="/js/criar-os.js"></script>
 </body>
 </html>

@@ -1,6 +1,12 @@
 // public/js/empresa-parceira.js
 
-import { getParceiras, criarParceira, getOSPorParceiro } from "./api.js";
+import {
+  getParceiras,
+  criarParceira,
+  atualizarParceira,
+  deletarParceira,
+  getOSPorParceiro
+} from "./api.js";
 
 const form            = document.getElementById("empresa-form");
 const formTitle       = document.getElementById("form-title");
@@ -19,13 +25,6 @@ const modal      = document.getElementById("modal");
 const modalBody  = document.getElementById("modal-body");
 const modalClose = document.getElementById("modal-close");
 
-/**
- * Carrega e renderiza todos os parceiros.
- * Para cada parceiro, inserimos:
- *  - um card com informações da parceira
- *  - um <input type="month"> para escolher mês/ano
- *  - botão "Gerar Relatório Mensal" com data-id e data-nome
- */
 async function loadParceiras() {
   container.innerHTML = "";
   try {
@@ -36,10 +35,6 @@ async function loadParceiras() {
     }
 
     list.forEach(e => {
-      // Criamos uma div.card com:
-      // - informações da parceira
-      // - um <input type="month"> para escolher mês/ano
-      // - botão "Gerar Relatório Mensal" (agora com data-nome)
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
@@ -50,12 +45,7 @@ async function loadParceiras() {
           <label for="mes-relatorio-${e.id}" style="font-size:0.9rem;">Mês/Ano:</label>
           <input type="month" id="mes-relatorio-${e.id}" name="mes-relatorio-${e.id}" style="margin-left:4px;" />
         </div>
-        <button 
-          class="btn-relatorio" 
-          data-id="${e.id}" 
-          data-nome="${e.nome}" 
-          style="margin-top:6px;"
-        >
+        <button class="btn-relatorio" data-id="${e.id}" data-nome="${e.nome}" style="margin-top:6px;">
           Gerar Relatório Mensal
         </button>
         <button class="btn-detalhes" data-id="${e.id}" style="margin-top:6px; margin-left:8px;">
@@ -65,91 +55,51 @@ async function loadParceiras() {
       container.appendChild(card);
     });
 
-    // Detalhes: abre modal de edição/exclusão
     document.querySelectorAll(".btn-detalhes").forEach(btn => {
       btn.addEventListener("click", () => {
-        const parceiroId = btn.dataset.id;
-        const parceiro = list.find(p => p.id === Number(parceiroId));
+        const parceiroId = Number(btn.dataset.id);
+        const parceiro = list.find(p => p.id === parceiroId);
         openModal(parceiro);
       });
     });
 
-    // Botão Relatório: usa o <input type="month"> para pegar mês/ano e data-nome
     document.querySelectorAll(".btn-relatorio").forEach(btn => {
       btn.addEventListener("click", async () => {
         const parceiroId = btn.dataset.id;
-        const parceiroNome = btn.dataset.nome; // pegamos o nome diretamente do data-nome
+        const parceiroNome = btn.dataset.nome;
         const inputMonth = document.getElementById(`mes-relatorio-${parceiroId}`);
-        const valorMonth = inputMonth.value; // ex: "2025-05"
-
-        if (!valorMonth) {
-          return alert("Selecione o mês/ano antes de gerar o relatório.");
-        }
-
+        const valorMonth = inputMonth.value;
+        if (!valorMonth) return alert("Selecione o mês/ano antes.");
         const [ano, mes] = valorMonth.split("-");
         const start = `${ano}-${mes}-01`;
         const lastDay = new Date(Number(ano), Number(mes), 0).getDate();
-        const diaFinal = String(lastDay).padStart(2, "0");
-        const end = `${ano}-${mes}-${diaFinal}`;
-
-        try {
-          const osList = await getOSPorParceiro(parceiroId, start, end);
-          if (!osList.length) {
-            return alert("Nenhuma ordem de serviço encontrada para esse período.");
-          }
-
-          const { jsPDF } = window.jspdf;
-          const doc = new jsPDF();
-
-          // Cabeçalho
-          doc.setFontSize(14);
-          doc.text("Relatório de Ordens de Serviço", 10, 20);
-          doc.setFontSize(12);
-          // Usamos parceiroNome em vez de buscar na lista
-          doc.text(`Parceiro: ${parceiroNome}`, 10, 30);
-          doc.text(`Período: ${start} até ${end}`, 10, 38);
-
-          // Corpo do relatório, agora referenciando os.carro em vez de os.cliente
-          let yPos = 50;
-          osList.forEach((os, i) => {
-            const carro = os.carro || {};   // CORREÇÃO: usar os.carro
-            const servico = os.servico || {};
-
-            // Primeira linha: número, OS#, cliente (proprietário), veículo (modelo) e placa
-            const linha1 =
-              `${i + 1}. OS#${os.id} – Cliente: ${carro.proprietario || 'N/A'} ` +
-              `(Veículo: ${carro.modelo || 'N/A'} – Placa: ${carro.placa || 'N/A'})`;
-            doc.text(linha1, 10, yPos);
-            yPos += 8;
-
-            // Segunda linha: serviço e valor
-            const linha2 = `   Serviço: ${servico.nome || 'N/A'} – Valor: R$${os.valorServico.toFixed(2)}`;
-            doc.text(linha2, 10, yPos);
-            yPos += 10; // espaço extra antes da próxima OS
-
-            if (yPos > 280) {
-              doc.addPage();
-              yPos = 20;
-            }
-          });
-
-          doc.save(`relatorio_parceiro_${parceiroId}_${ano}${mes}.pdf`);
-        } catch (err) {
-          console.error("Erro ao gerar relatório:", err);
-          alert("Erro ao gerar relatório: " + err.message);
-        }
+        const end = `${ano}-${mes}-${String(lastDay).padStart(2,"0")}`;
+        const osList = await getOSPorParceiro(parceiroId, start, end);
+        if (!osList.length) return alert("Nenhuma OS nesse período.");
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(14);
+        doc.text("Relatório de Ordens de Serviço", 10, 20);
+        doc.setFontSize(12);
+        doc.text(`Parceiro: ${parceiroNome}`, 10, 30);
+        doc.text(`Período: ${start} até ${end}`, 10, 38);
+        let yPos = 50;
+        osList.forEach((os, i) => {
+          const linha1 = `${i+1}. OS#${os.id} – Cliente: ${os.carro.proprietario} (Veículo: ${os.carro.modelo} – Placa: ${os.carro.placa})`;
+          doc.text(linha1, 10, yPos); yPos += 8;
+          const linha2 = `   Serviço: ${os.servico.nome} – Valor: R$${os.valorServico.toFixed(2)}`;
+          doc.text(linha2, 10, yPos); yPos += 10;
+          if (yPos > 280) { doc.addPage(); yPos = 20; }
+        });
+        doc.save(`relatorio_parceiro_${parceiroId}_${ano}${mes}.pdf`);
       });
     });
 
   } catch (err) {
-    console.error("Erro ao buscar empresas parceiras:", err);
-    container.innerHTML = `<p style="color:red;">Erro ao buscar: ${err.message}</p>`;
+    container.innerHTML = `<p style="color:red;">Erro: ${err.message}</p>`;
   }
 }
 
-/**
- * Abre modal com detalhes completos do parceiro
- */
 function openModal(e) {
   modalBody.innerHTML = `
     <h3>${e.nome}</h3>
@@ -162,87 +112,64 @@ function openModal(e) {
         : "Não enviado"
     }</p>
     <p><strong>Criado Em:</strong> ${new Date(e.criadoEm).toLocaleString()}</p>
-    <div style="margin-top:15px; text-align:right;">
+    <div style="text-align:right; margin-top:15px;">
       <button id="btn-edit">Editar</button>
       <button id="btn-delete" style="margin-left:8px; background:#dc3545; color:#fff;">Excluir</button>
     </div>
   `;
   modal.style.display = "flex";
 
-  document.getElementById("btn-edit").addEventListener("click", () => {
-    startEdit(e);
+  document.getElementById("btn-edit").onclick = () => {
+    formTitle.textContent = "Editar Parceira";
+    submitBtn.textContent = "Atualizar";
+    cancelEditBtn.style.display = "inline-block";
+    inputId.value        = e.id;
+    inputNome.value      = e.nome;
+    inputCnpj.value      = e.cnpj;
+    inputDescricao.value = e.descricao;
+    inputValor.value     = e.valorMensal;
+    atualContrato.textContent = e.contratoUrl
+      ? `Contrato atual: ${e.contratoUrl.split("/").pop()}`
+      : "";
     modal.style.display = "none";
-  });
-  document.getElementById("btn-delete").addEventListener("click", async () => {
+  };
+
+  document.getElementById("btn-delete").onclick = async () => {
     if (!confirm(`Excluir "${e.nome}"?`)) return;
-    try {
-      await fetch(`/api/parceiras/${e.id}`, { method: "DELETE" });
-      loadParceiras();
-      modal.style.display = "none";
-    } catch (err) {
-      alert("Erro ao excluir: " + err.message);
-    }
-  });
+    await deletarParceira(e.id);
+    modal.style.display = "none";
+    loadParceiras();
+  };
 }
 
-/**
- * Inicia o modo de edição: preenche o formulário
- */
-function startEdit(e) {
-  formTitle.textContent = "Editar Parceira";
-  submitBtn.textContent = "Atualizar";
-  cancelEditBtn.style.display = "inline-block";
-
-  inputId.value        = e.id;
-  inputNome.value      = e.nome;
-  inputCnpj.value      = e.cnpj;
-  inputDescricao.value = e.descricao;
-  inputValor.value     = e.valorMensal;
-  atualContrato.textContent = e.contratoUrl
-    ? `Contrato atual: ${e.contratoUrl.split("/").pop()}`
-    : "";
-}
-
-// Cancela o modo edição
-cancelEditBtn.addEventListener("click", () => {
+cancelEditBtn.onclick = () => {
   formTitle.textContent = "Cadastrar Nova Parceira";
   submitBtn.textContent = "Salvar Parceira";
   cancelEditBtn.style.display = "none";
   inputId.value = "";
   form.reset();
   atualContrato.textContent = "";
-});
+};
 
-// Trata submissão (criar ou atualizar)
-form.addEventListener("submit", async e => {
+form.onsubmit = async e => {
   e.preventDefault();
   const id = inputId.value;
   const data = new FormData(form);
-  try {
-    if (id) {
-      // atualizar via PUT (sem upload de PDF)
-      const opts = {
-        method: "PUT",
-        body: JSON.stringify(Object.fromEntries(data.entries())),
-        headers: { "Content-Type": "application/json" }
-      };
-      await fetch(`/api/parceiras/${id}`, opts);
-      alert("Parceira atualizada!");
-    } else {
-      // criar via multipart (FormData, permite upload de PDF)
-      await criarParceira(data);
-      alert("Parceira cadastrada!");
-    }
-    cancelEditBtn.click();
-    loadParceiras();
-  } catch (err) {
-    alert("Erro: " + err.message);
+  if (id) {
+    // atualização
+    const obj = Object.fromEntries(data.entries());
+    await atualizarParceira(id, obj);
+    alert("Parceira atualizada!");
+  } else {
+    // criação
+    await criarParceira(data);
+    alert("Parceira cadastrada!");
   }
-});
+  cancelEditBtn.click();
+  loadParceiras();
+};
 
-modalClose.addEventListener("click", () => {
-  modal.style.display = "none";
-});
+modalClose.onclick = () => modal.style.display = "none";
 window.addEventListener("click", evt => {
   if (evt.target === modal) modal.style.display = "none";
 });

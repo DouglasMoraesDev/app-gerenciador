@@ -1,163 +1,121 @@
 // public/js/criar-os.js
+import { criarOrdem, getServicos, getParceiras } from './api.js';
 
-import {
-  getCarros,
-  getServicos,
-  getParceiras,   // IMPORTADO para popular o dropdown de parceiros
-  criarOrdem
-} from "./api.js"; // certifique-se que api.js tenha getParceiras()
+const form       = document.getElementById('criar-os-form');
+const container  = document.getElementById('itens-container');
+const addBtn     = document.getElementById('add-item');
 
-const form = document.getElementById("criar-os-form");
-const carroSelect = document.getElementById("carroId");
-const servicoSelect = document.getElementById("servicoId");
-const parceiroSelect = document.getElementById("parceiroId"); // NOVO select para parceiros
-const buscaCarro = document.getElementById("busca-carro");
-const buscaServico = document.getElementById("busca-servico");
-const buscaParceiro = document.getElementById("busca-parceiro"); // NOVO input de busca para parceiros
-const descricaoServicoEl = document.getElementById("descricaoServico");
-const valorServicoEl = document.getElementById("valorServico");
-
-/**
- * Carrega lista de carros, serviços e parceiros para os selects.
- * Chamado no DOMContentLoaded.
- */
-async function loadDados() {
-  // 1) Carregar Carros
-  const carros = await getCarros();
-  carroSelect.innerHTML = `<option value="">-- selecione carro --</option>`;
-  carros.forEach(c => {
-    const opt = document.createElement("option");
-    // Exibe placa e proprietário: “ABC-1234 (João Silva)”
-    opt.value = c.id;
-    opt.textContent = `${c.placa} (${c.proprietario})`;
-    carroSelect.appendChild(opt);
-  });
-
-  // 2) Carregar Serviços
-  const servicos = await getServicos();
-  servicoSelect.innerHTML = `<option value="">-- selecione serviço --</option>`;
-  servicos.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.id;
-    opt.textContent = `${s.nome} (R$ ${s.valor.toFixed(2)})`;
-    servicoSelect.appendChild(opt);
-  });
-
-  // 3) Carregar Parceiras (Lista completa para dropdown)
-  const parceiros = await getParceiras();
-  parceiroSelect.innerHTML = `<option value="">-- nenhuma parceira --</option>`;
-  parceiros.forEach(p => {
-    const opt = document.createElement("option");
-    opt.value = p.id;
-    opt.textContent = p.nome;
-    parceiroSelect.appendChild(opt);
+function maskBRL(input) {
+  input.addEventListener('input', () => {
+    let v = input.value.replace(/\D/g, '');
+    v = (v / 100).toFixed(2) + '';
+    v = v.replace('.', ',').replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+    input.value = v;
   });
 }
 
-// Filtragem ao digitar nome do carro (placa, modelo ou proprietário)
-buscaCarro.addEventListener("input", async () => {
-  const term = buscaCarro.value.trim().toLowerCase();
-  const carros = await getCarros();
-  carroSelect.innerHTML = `<option value="">-- selecione carro --</option>`;
-  carros
-    .filter(c => {
-      return (
-        c.placa.toLowerCase().includes(term) ||
-        (c.modelo && c.modelo.toLowerCase().includes(term)) ||
-        c.proprietario.toLowerCase().includes(term)
-      );
-    })
-    .forEach(c => {
-      const opt = document.createElement("option");
-      opt.value = c.id;
-      opt.textContent = `${c.placa} (${c.proprietario})`;
-      carroSelect.appendChild(opt);
-    });
-});
+function newItem(idx) {
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.innerHTML = `
+    <select name="servico" required>
+      <option value="">-- selecione serviço --</option>
+    </select>
+    <input name="valor" placeholder="R$" required />
+    <button type="button" class="rmv">✕</button>
+  `;
+  const sel = div.querySelector('select');
+  const inp = div.querySelector('input');
+  div.querySelector('.rmv').onclick = () => {
+    if (container.children.length > 1) div.remove();
+  };
+  maskBRL(inp);
+  // ao mudar serviço, já pré‑põe valor
+  sel.onchange = () => {
+    const opt = sel.selectedOptions[0];
+    if (opt && opt.dataset.valor) {
+      inp.value = parseFloat(opt.dataset.valor)
+                  .toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    }
+  };
+  return div;
+}
 
-// Filtragem ao digitar nome do serviço
-buscaServico.addEventListener("input", async () => {
-  const term = buscaServico.value.trim().toLowerCase();
-  const servicos = await getServicos();
-  servicoSelect.innerHTML = `<option value="">-- selecione serviço --</option>`;
-  servicos
-    .filter(s => s.nome.toLowerCase().includes(term))
-    .forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = `${s.nome} (R$ ${s.valor.toFixed(2)})`;
-      servicoSelect.appendChild(opt);
-    });
-});
-
-// Filtragem ao digitar nome da empresa parceira
-buscaParceiro.addEventListener("input", async () => {
-  const term = buscaParceiro.value.trim().toLowerCase();
+async function init() {
+  const servicos  = await getServicos();
   const parceiros = await getParceiras();
-  parceiroSelect.innerHTML = `<option value="">-- nenhuma parceira --</option>`;
-  parceiros
-    .filter(p => p.nome.toLowerCase().includes(term))
-    .forEach(p => {
-      const opt = document.createElement("option");
-      opt.value = p.id;
-      opt.textContent = p.nome;
-      parceiroSelect.appendChild(opt);
+
+  // popula select de parceiros
+  const psel = form.querySelector('select[name="parceiroId"]');
+  parceiros.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id;
+    o.textContent = p.nome;
+    psel.appendChild(o);
+  });
+
+  // primeira linha de serviço
+  container.appendChild(newItem(0));
+  // preenche opções de serviço
+  container.querySelectorAll('select[name="servico"]').forEach(sel => {
+    servicos.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.dataset.valor = s.valor;
+      o.textContent = s.nome;
+      sel.appendChild(o);
     });
-});
+  });
 
-// Ao selecionar um serviço, pré-preenche descrição e valor (que agora é editável)
-servicoSelect.addEventListener("change", async () => {
-  const id = Number(servicoSelect.value);
-  if (!id) {
-    descricaoServicoEl.value = "";
-    valorServicoEl.value = "";
-    return;
-  }
-  const s = await getServicos().then(list => list.find(x => x.id === id));
-  if (s) {
-    descricaoServicoEl.value = s.descricao;
-    valorServicoEl.value = s.valor.toFixed(2); // preenche, mas usuário pode alterar
-  } else {
-    descricaoServicoEl.value = "";
-    valorServicoEl.value = "";
-  }
-});
+  addBtn.onclick = () => {
+    const idx = container.children.length;
+    const row = newItem(idx);
+    // popula serviços na nova linha
+    servicos.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s.id;
+      o.dataset.valor = s.valor;
+      o.textContent = s.nome;
+      row.querySelector('select').appendChild(o);
+    });
+    container.appendChild(row);
+  };
 
-form.addEventListener("submit", async e => {
-  e.preventDefault();
+  form.onsubmit = async e => {
+    e.preventDefault();
+    // coleta placa/modelo/parceiroId
+    const plate      = form.plate.value.trim();
+    const model      = form.model.value.trim();
+    const parceiroId = form.parceiroId.value || null;
 
-  const carroId = Number(form.carroId.value);
-  const servicoId = Number(form.servicoId.value);
-  const descricaoServico = form.descricaoServico.value.trim();
-  const valorServico = parseFloat(form.valorServico.value);
-  const status = form.status.value;
-  const parceiroId = form.parceiroId.value
-    ? Number(form.parceiroId.value)
-    : null; // Se estiver vazio, mantemos null
+    if (!plate || !model) {
+      return alert('Informe placa e modelo do carro.');
+    }
 
-  if (!carroId) {
-    return alert("Selecione um carro.");
-  }
-  if (!servicoId) {
-    return alert("Selecione um serviço.");
-  }
+    // coleta itens
+    const itens = Array.from(container.children).map(row => {
+      const servicoId   = Number(row.querySelector('select[name="servico"]').value);
+      // converter string "1.234,56" para número
+      const valorText   = row.querySelector('input[name="valor"]').value;
+      const valor       = parseFloat(valorText.replace(/\./g,'').replace(',', '.'));
+      return { servicoId, valorServico: valor };
+    });
 
-  // Monta o objeto a ser enviado ao backend
-  const dados = { carroId, servicoId, descricaoServico, valorServico, status };
-  if (parceiroId) {
-    dados.parceiroId = parceiroId;
-  }
+    if (itens.length === 0) {
+      return alert('Adicione ao menos um serviço.');
+    }
 
-  try {
-    await criarOrdem(dados);
-    alert("Ordem criada com sucesso!");
-    form.reset();
-    descricaoServicoEl.value = "";
-    valorServicoEl.value = "";
-    parceiroSelect.value = ""; // Resetar o select de parceiro
-  } catch (err) {
-    alert(`Erro ao criar ordem: ${err.message}`);
-  }
-});
+    // envia ao back
+    try {
+      await criarOrdem({ plate, model, parceiroId, itens });
+      alert('Ordem criada com sucesso!');
+      form.reset();
+      container.innerHTML = '';
+      container.appendChild(newItem(0));
+    } catch (err) {
+      alert('Erro ao criar ordem: ' + err.message);
+    }
+  };
+}
 
-document.addEventListener("DOMContentLoaded", loadDados);
+document.addEventListener('DOMContentLoaded', init);

@@ -5,7 +5,7 @@ import path from "path";
 
 import prisma from "./prismaClient.js";
 import authRoutes      from "./routes/authRoutes.js";
-import carRoutes       from "./routes/carRoutes.js";       // Nova rota para “carros”
+//import carRoutes       from "./routes/carRoutes.js";       // Nova rota para “carros”
 import servicosRoutes  from "./routes/servicosRoutes.js";
 import osRoutes        from "./routes/osRoutes.js";
 import caixaRoutes     from "./routes/caixaRoutes.js";
@@ -64,7 +64,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Rotas da API
 app.use("/api/auth",      authRoutes);
-app.use("/api/carros",    carRoutes);      // Rota de “carros” (antes era “clientes”)
+//app.use("/api/carros",    carRoutes);      // Rota de “carros” (antes era “clientes”)
 app.use("/api/servicos",  servicosRoutes);
 app.use("/api/os",        osRoutes);
 app.use("/api/caixa",     caixaRoutes);
