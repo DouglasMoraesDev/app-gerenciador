@@ -1,7 +1,7 @@
 // public/js/gastos.js
 
 import { getCaixaAtual, getGastos, criarGasto, excluirGasto } from "./api.js";
-// Importamos do novo local em public/js/util/format.js
+// Importa formatadores do util
 import { formatBRL, parseBRL } from "./utils/format.js";
 
 const form = document.getElementById("gasto-form");
@@ -21,7 +21,7 @@ async function loadGastos() {
       card.className = "card";
       card.innerHTML = `
         <p><strong>Descrição:</strong> ${g.descricao}</p>
-        <p><strong>Valor:</strong> R$ ${formatBRL(g.valor)}</p>
+        <p><strong>Valor:</strong> <strong>R$ ${formatBRL(g.valor)}</strong></p>
         <p><strong>Data:</strong> ${new Date(g.data).toLocaleDateString()}</p>
         <button>Excluir</button>
       `;
