@@ -65,13 +65,13 @@ btnGen.addEventListener("click", async () => {
       return;
     }
 
-    // Monta HTML com resumo e lista detalhada
+    // Monta HTML com resumo e lista detalhada, com negrito nos totais
     const resumoHtml = `
       <div style="margin-bottom: 12px;">
-        <p><strong>Saldo Inicial:</strong> R$ ${formatBRL(saldoInicial)}</p>
-        <p><strong>Total Entradas:</strong> R$ ${formatBRL(totalEntradas)}</p>
-        <p><strong>Total Saídas:</strong> R$ ${formatBRL(totalSaidas)}</p>
-        <p><strong>Saldo Final:</strong> R$ ${formatBRL(saldoFinal)}</p>
+        <p><strong>Saldo Inicial:</strong> <strong>R$ ${formatBRL(saldoInicial)}</strong></p>
+        <p><strong>Total Entradas:</strong> <strong>R$ ${formatBRL(totalEntradas)}</strong></p>
+        <p><strong>Total Saídas:</strong> <strong>R$ ${formatBRL(totalSaidas)}</strong></p>
+        <p><strong>Saldo Final:</strong> <strong>R$ ${formatBRL(saldoFinal)}</strong></p>
       </div>
     `;
 
@@ -99,7 +99,7 @@ btnGen.addEventListener("click", async () => {
   }
 });
 
-// Exporta PDF via jsPDF, incluindo resumo completo
+// Exporta PDF via jsPDF, incluindo resumo completo em negrito
 btnPdf.addEventListener("click", async () => {
   if (!currentData.length) {
     return alert("Nenhuma movimentação para exportar.");
@@ -128,12 +128,16 @@ btnPdf.addEventListener("click", async () => {
   doc.setFontSize(14);
   doc.text(titleEl.textContent, 10, 20);
 
+  // Negrito para totais
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(12);
   doc.text(`Saldo Inicial: R$ ${formatBRL(saldoInicial)}`, 10, 30);
   doc.text(`Total Entradas: R$ ${formatBRL(totalEntradas)}`, 10, 38);
   doc.text(`Total Saídas: R$ ${formatBRL(totalSaidas)}`, 10, 46);
   doc.text(`Saldo Final: R$ ${formatBRL(saldoFinal)}`, 10, 54);
 
+  // Volta para fonte normal para a lista de movimentações
+  doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   let y = 66;
   currentData.forEach((m, i) => {
