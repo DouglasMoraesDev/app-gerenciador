@@ -1,4 +1,8 @@
+// public/js/gastos.js
+
 import { getCaixaAtual, getGastos, criarGasto, excluirGasto } from "./api.js";
+// Importamos do novo local em public/js/util/format.js
+import { formatBRL, parseBRL } from "./utils/format.js";
 
 const form = document.getElementById("gasto-form");
 const container = document.getElementById("gastos-container");
@@ -7,14 +11,18 @@ async function loadGastos() {
   container.innerHTML = "";
   try {
     const gastos = await getGastos();
+    if (!gastos.length) {
+      container.innerHTML = "<p>Nenhum gasto registrado.</p>";
+      return;
+    }
+
     gastos.forEach(g => {
       const card = document.createElement("div");
       card.className = "card";
       card.innerHTML = `
-        <h3>${g.categoria}</h3>
-        <p>${g.descricao}</p>
-        <p>R$ ${g.valor.toFixed(2)}</p>
-        <p>${new Date(g.data).toLocaleDateString()}</p>
+        <p><strong>Descrição:</strong> ${g.descricao}</p>
+        <p><strong>Valor:</strong> R$ ${formatBRL(g.valor)}</p>
+        <p><strong>Data:</strong> ${new Date(g.data).toLocaleDateString()}</p>
         <button>Excluir</button>
       `;
       card.querySelector("button").onclick = async () => {
@@ -34,25 +42,34 @@ form.addEventListener("submit", async e => {
   e.preventDefault();
 
   // Verifica se há caixa aberto
-  const caixa = await getCaixaAtual();
+  let caixa;
+  try {
+    caixa = await getCaixaAtual();
+  } catch {
+    caixa = null;
+  }
   if (!caixa) {
     return alert("Você precisa abrir o Caixa antes de registrar gastos.");
   }
 
-  const categoria = form.categoria.value.trim();
   const descricao = form.descricao.value.trim();
-  const valor     = parseFloat(form.valor.value);
+  const valorStr  = form.valor.value.trim();
   const data      = form.data.value;
-  if (!categoria || !descricao || isNaN(valor) || valor <= 0) {
+
+  if (!descricao || !valorStr || !data) {
     return alert("Preencha todos os campos corretamente.");
   }
 
+  const valor = parseBRL(valorStr);
+  if (isNaN(valor) || valor <= 0) {
+    return alert("Valor inválido. Use formato 1.234,56");
+  }
+
   try {
-    await criarGasto({ categoria, descricao, valor, data });
+    await criarGasto({ descricao, valor, data });
     form.reset();
     loadGastos();
   } catch (err) {
-    // Se for erro de Caixa não encontrado, já alertamos antes
     alert("Erro ao registrar gasto: " + err.message);
   }
 });

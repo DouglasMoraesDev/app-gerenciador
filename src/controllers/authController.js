@@ -1,7 +1,7 @@
 import prisma from "../prismaClient.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { validarEmail } from "../utils/validators.js";
+import { validarEmail } from "../../public/js/utils/validators.js";
 
 // Controller de login e registro de usuários
 

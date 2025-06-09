@@ -1,7 +1,7 @@
 // src/services/osService.js
 
 import { PrismaClient } from "@prisma/client";
-import { parseBRL } from "../utils/format.js";
+import { parseBRL } from "../../public/js/utils/format.js";
 
 const prisma = new PrismaClient();
 

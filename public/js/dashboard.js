@@ -1,3 +1,5 @@
+// public/js/dashboard.js
+
 import {
   getOrdens,
   getCaixaAtual,
@@ -5,8 +7,11 @@ import {
   getServicos
 } from "./api.js";
 
+// Agora importamos de public/js/util/format.js
+import { formatBRL } from "./utils/format.js";
+
 document.addEventListener("DOMContentLoaded", async () => {
-  // Exibe nome do usuário
+  // 1) Exibe nome do usuário
   const token = localStorage.getItem("token");
   if (token) {
     try {
@@ -19,39 +24,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("user-name").textContent = "Visitante";
   }
 
-  // Busca dados em paralelo (sem getCarros)
-  const [ordens, caixa, gastos, servicos] = await Promise.all([
-    getOrdens(),
-    getCaixaAtual(),
-    getGastos(),
-    getServicos()
-  ]);
+  // 2) Busca dados em paralelo
+  let ordens = [], caixa = null, gastos = [], servicos = [];
+  try {
+    [ordens, caixa, gastos, servicos] = await Promise.all([
+      getOrdens(),
+      getCaixaAtual().catch(() => null),
+      getGastos(),
+      getServicos()
+    ]);
+  } catch (err) {
+    console.error("Erro ao buscar dados:", err);
+  }
 
-  // Filtra ordens e gastos do dia
-  const hojeStr = new Date().toDateString();
-  const ordensHoje = ordens.filter(o =>
-    new Date(o.criadoEm).toDateString() === hojeStr
-  );
+  // 3) Filtra ORDENS DO DIA
+  const hoje = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const ordensHoje = ordens.filter(o => o.criadoEm.slice(0, 10) === hoje);
+
+  // 4) Filtra GASTOS DO DIA e soma
   const gastosHoje = gastos
-    .filter(g => new Date(g.data).toDateString() === hojeStr)
+    .filter(g => g.data.slice(0, 10) === hoje)
     .reduce((sum, g) => sum + g.valor, 0);
 
-  // Prepara cards (tirado “Carros Cadastrados”)
+  // 5) Monta os cards (com redirecionamento ao clicar)
   const cardsData = [
-    { title: "Ordens Hoje", value: ordensHoje.length },
+    {
+      title: "Ordens Hoje",
+      value: ordensHoje.length,
+      link: "/os-list.html"
+    },
     {
       title: "Saldo Atual Caixa",
       value: caixa
-        ? `R$ ${(caixa.saldoInicial + caixa.entradas - caixa.saidas).toFixed(2)}`
-        : "R$ 0,00"
+        ? `R$ ${formatBRL(caixa.saldoInicial + caixa.entradas - caixa.saidas)}`
+        : "R$ 0,00",
+      link: "/caixa.html"
     },
-    { title: "Gastos Hoje", value: `R$ ${gastosHoje.toFixed(2)}` },
-    { title: "Serviços Cadastrados", value: servicos.length }
+    {
+      title: "Gastos Hoje",
+      value: `R$ ${formatBRL(gastosHoje)}`,
+      link: "/gastos.html"
+    },
+    {
+      title: "Serviços Cadastrados",
+      value: servicos.length,
+      link: null
+    }
   ];
 
-  // Renderiza cards
   const container = document.getElementById("dash-cards");
   container.innerHTML = "";
+
   cardsData.forEach(c => {
     const card = document.createElement("div");
     card.className = "card";
@@ -59,25 +82,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       <h3>${c.title}</h3>
       <p style="font-size:1.5rem; margin-top:10px;">${c.value}</p>
     `;
+    if (c.link) {
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => {
+        window.location.href = c.link;
+      });
+    }
     container.appendChild(card);
   });
 
-  // Gráfico de pizza
-  const ctx = document.getElementById("status-pie");
-  const statusCounts = ordensHoje.reduce((acc, o) => {
-    acc[o.status] = (acc[o.status] || 0) + 1;
-    return acc;
-  }, {});
-
-  new Chart(ctx, {
-    type: "pie",
-    data: {
-      labels: Object.keys(statusCounts),
-      datasets: [{ data: Object.values(statusCounts) }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { position: "bottom" } }
-    }
-  });
+  // Nenhum gráfico aqui, pois foi removido.
 });

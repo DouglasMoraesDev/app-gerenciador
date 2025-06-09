@@ -7,6 +7,8 @@ import {
   atualizarServico,
   excluirServico
 } from "./api.js";
+// Importa formatadores do util
+import { formatBRL, parseBRL } from "./utils/format.js";
 
 const form = document.getElementById("servico-form");
 const formTitle = document.getElementById("form-title");
@@ -34,7 +36,7 @@ async function populateFormForEdit(editId) {
     const serv = await getServicoById(Number(editId));
     document.getElementById("nomeServ").value = serv.nome;
     document.getElementById("descricaoServ").value = serv.descricao;
-    document.getElementById("valorServ").value = serv.valor.toFixed(2);
+    document.getElementById("valorServ").value = formatBRL(serv.valor);
     formTitle.textContent = "Editar Serviço";
     btnSubmit.textContent = "Salvar Alterações";
     form.dataset.editId = editId;
@@ -61,7 +63,7 @@ async function loadServicos() {
     servicos.forEach(serv => {
       const card = document.createElement("div");
       card.classList.add("card");
-      // Exibe nome e valor, truncando a descrição (opcional)
+      // Exibe nome e valor formatado, truncando a descrição (opcional)
       const descricaoCurta = serv.descricao.length > 60
         ? serv.descricao.slice(0, 57) + "..."
         : serv.descricao;
@@ -69,8 +71,9 @@ async function loadServicos() {
       card.innerHTML = `
         <h3>${serv.nome}</h3>
         <p>${descricaoCurta}</p>
-        <p><strong>R$ ${serv.valor.toFixed(2)}</strong></p>
+        <p><strong>R$ ${formatBRL(serv.valor)}</strong></p>
       `;
+      card.style.cursor = "pointer";
       card.addEventListener("click", () => openModal(serv.id));
       cardsContainer.appendChild(card);
     });
@@ -95,7 +98,7 @@ async function openModal(idServico) {
     modalBody.innerHTML = `
       <h3>${serv.nome}</h3>
       <p><strong>Descrição:</strong> ${serv.descricao}</p>
-      <p><strong>Valor:</strong> R$ ${serv.valor.toFixed(2)}</p>
+      <p><strong>Valor:</strong> R$ ${formatBRL(serv.valor)}</p>
       <p><strong>Criado Em:</strong> ${criadoEm}</p>
       <div style="margin-top: 15px; text-align: right;">
         <button id="btn-editar">Editar</button>
@@ -163,8 +166,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const dados = {
       nome: document.getElementById("nomeServ").value.trim(),
       descricao: document.getElementById("descricaoServ").value.trim(),
-      valor: parseFloat(document.getElementById("valorServ").value),
+      valor: parseBRL(document.getElementById("valorServ").value.trim()),
     };
+
+    if (!dados.nome || !dados.descricao || isNaN(dados.valor) || dados.valor <= 0) {
+      msgEl.textContent = "Preencha todos os campos corretamente (valor no formato 1.234,56).";
+      msgEl.style.display = "block";
+      return;
+    }
 
     try {
       if (form.dataset.editId) {

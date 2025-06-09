@@ -126,7 +126,6 @@ model CaixaMov {
 
 model Gasto {
   id        Int      @id @default(autoincrement())
-  categoria String
   descricao String
   valor     Float
   data      DateTime @default(now())
@@ -137,6 +136,7 @@ model Gasto {
   movCaixa   CaixaMov? @relation("GastoCaixa", fields: [movCaixaId], references: [id])
   movCaixaId Int?      @unique
 }
+
 
 model EmpresaParceira {
   id          Int      @id @default(autoincrement())

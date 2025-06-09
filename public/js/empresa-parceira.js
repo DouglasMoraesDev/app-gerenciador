@@ -8,6 +8,9 @@ import {
   getOSPorParceiro
 } from "./api.js";
 
+// Importação ajustada para public/js/util/format.js
+import { formatBRL, parseBRL } from "./utils/format.js";
+
 const form            = document.getElementById("empresa-form");
 const formTitle       = document.getElementById("form-title");
 const submitBtn       = document.getElementById("submit-btn");
@@ -40,7 +43,7 @@ async function loadParceiras() {
       card.innerHTML = `
         <h3>${e.nome}</h3>
         <p><strong>CNPJ:</strong> ${e.cnpj}</p>
-        <p><strong>Valor:</strong> R$ ${e.valorMensal.toFixed(2)}/mês</p>
+        <p><strong>Valor:</strong> R$ ${formatBRL(e.valorMensal)}/mês</p>
         <div class="relatorio-controls" style="margin-top:8px;">
           <label for="mes-relatorio-${e.id}" style="font-size:0.9rem;">Mês/Ano:</label>
           <input type="month" id="mes-relatorio-${e.id}" name="mes-relatorio-${e.id}" style="margin-left:4px;" />
@@ -70,12 +73,15 @@ async function loadParceiras() {
         const inputMonth = document.getElementById(`mes-relatorio-${parceiroId}`);
         const valorMonth = inputMonth.value;
         if (!valorMonth) return alert("Selecione o mês/ano antes.");
+
         const [ano, mes] = valorMonth.split("-");
         const start = `${ano}-${mes}-01`;
         const lastDay = new Date(Number(ano), Number(mes), 0).getDate();
         const end = `${ano}-${mes}-${String(lastDay).padStart(2,"0")}`;
+
         const osList = await getOSPorParceiro(parceiroId, start, end);
         if (!osList.length) return alert("Nenhuma OS nesse período.");
+
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         doc.setFontSize(14);
@@ -83,14 +89,26 @@ async function loadParceiras() {
         doc.setFontSize(12);
         doc.text(`Parceiro: ${parceiroNome}`, 10, 30);
         doc.text(`Período: ${start} até ${end}`, 10, 38);
-        let yPos = 50;
+
+        const totalMensal = osList.reduce((sum, os) => sum + os.valorServico, 0);
+        doc.text(`Valor Total do Período: R$${formatBRL(totalMensal)}`, 10, 46);
+
+        let yPos = 56;
         osList.forEach((os, i) => {
-          const linha1 = `${i+1}. OS#${os.id} – Cliente: ${os.carro.proprietario} (Veículo: ${os.carro.modelo} – Placa: ${os.carro.placa})`;
-          doc.text(linha1, 10, yPos); yPos += 8;
-          const linha2 = `   Serviço: ${os.servico.nome} – Valor: R$${os.valorServico.toFixed(2)}`;
-          doc.text(linha2, 10, yPos); yPos += 10;
-          if (yPos > 280) { doc.addPage(); yPos = 20; }
+          const linha1 = `${i + 1}. OS#${os.id} – Veículo: ${os.modelo} – Placa: ${os.placa}`;
+          doc.text(linha1, 10, yPos);
+          yPos += 8;
+
+          const linha2 = `   Serviço: ${os.descricaoServico} – Valor: R$${formatBRL(os.valorServico)}`;
+          doc.text(linha2, 10, yPos);
+          yPos += 10;
+
+          if (yPos > 280) {
+            doc.addPage();
+            yPos = 20;
+          }
         });
+
         doc.save(`relatorio_parceiro_${parceiroId}_${ano}${mes}.pdf`);
       });
     });
@@ -105,7 +123,7 @@ function openModal(e) {
     <h3>${e.nome}</h3>
     <p><strong>CNPJ:</strong> ${e.cnpj}</p>
     <p><strong>Descrição:</strong><br/>${e.descricao}</p>
-    <p><strong>Valor Mensal:</strong> R$ ${e.valorMensal.toFixed(2)}</p>
+    <p><strong>Valor Mensal:</strong> R$ ${formatBRL(e.valorMensal)}</p>
     <p><strong>Contrato:</strong> ${
       e.contratoUrl
         ? `<a href="${e.contratoUrl}" target="_blank">Abrir PDF</a>`
@@ -127,7 +145,8 @@ function openModal(e) {
     inputNome.value      = e.nome;
     inputCnpj.value      = e.cnpj;
     inputDescricao.value = e.descricao;
-    inputValor.value     = e.valorMensal;
+    // Exibe o valor mensal no campo (formatado em BRL para o usuário)
+    inputValor.value     = formatBRL(e.valorMensal);
     atualContrato.textContent = e.contratoUrl
       ? `Contrato atual: ${e.contratoUrl.split("/").pop()}`
       : "";
@@ -154,15 +173,24 @@ cancelEditBtn.onclick = () => {
 form.onsubmit = async e => {
   e.preventDefault();
   const id = inputId.value;
-  const data = new FormData(form);
+
+  // Lê a string BRL e converte para Number
+  const rawValor = inputValor.value.trim();
+  const valorNum = parseBRL(rawValor);
+  if (isNaN(valorNum) || valorNum <= 0) {
+    return alert("Informe Valor Mensal no formato 1.234,56.");
+  }
+
+  const dataForm = new FormData(form);
+  // Substitui a string BRL por Number real no FormData
+  dataForm.set("valorMensal", valorNum);
+
   if (id) {
-    // atualização
-    const obj = Object.fromEntries(data.entries());
+    const obj = Object.fromEntries(dataForm.entries());
     await atualizarParceira(id, obj);
     alert("Parceira atualizada!");
   } else {
-    // criação
-    await criarParceira(data);
+    await criarParceira(dataForm);
     alert("Parceira cadastrada!");
   }
   cancelEditBtn.click();

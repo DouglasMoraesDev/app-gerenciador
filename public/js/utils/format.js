@@ -1,3 +1,5 @@
+// public/js/util/format.js
+
 /**
  * Converte string BRL "1.234,56" → Number 1234.56
  */

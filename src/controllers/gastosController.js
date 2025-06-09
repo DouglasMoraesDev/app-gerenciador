@@ -1,5 +1,8 @@
+// controllers/gastosController.js
+
 import gastosService from "../services/gastosService.js";
 import caixaService from "../services/caixaService.js";
+
 // GET /api/gastos
 export async function getTodosGastos(req, res, next) {
   try {
@@ -13,15 +16,16 @@ export async function getTodosGastos(req, res, next) {
 // POST /api/gastos
 export async function criarGasto(req, res, next) {
   try {
-    const { categoria, descricao, valor, data } = req.body;
-    if (!categoria || !descricao || valor == null) {
-      return res.status(400).json({ error: "Categoria, descrição e valor são obrigatórios." });
+    // Lê apenas descricao, valor e data
+    const { descricao, valor, data } = req.body;
+    if (!descricao || valor == null) {
+      return res.status(400).json({ error: "Descrição e valor são obrigatórios." });
     }
     if (valor <= 0) {
       return res.status(400).json({ error: "Valor deve ser maior que zero." });
     }
 
-    // 1) Obter o caixa aberto usando o método correto
+    // 1) Obter o caixa aberto
     const caixa = await caixaService.getCaixaAberto();
     if (!caixa) {
       return res.status(400).json({ error: "Você precisa abrir o caixa antes de registrar gastos." });
@@ -36,9 +40,8 @@ export async function criarGasto(req, res, next) {
       ordemId: null
     });
 
-    // 3) Criar o gasto vinculando ao mov.id retornado
+    // 3) Criar o gasto (sem categoria)
     const gasto = await gastosService.criar({
-      categoria,
       descricao,
       valor,
       data,
@@ -51,7 +54,6 @@ export async function criarGasto(req, res, next) {
     next(err);
   }
 }
-
 
 // DELETE /api/gastos/:id
 export async function deletarGasto(req, res, next) {

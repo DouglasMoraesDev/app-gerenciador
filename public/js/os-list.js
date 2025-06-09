@@ -1,14 +1,17 @@
 // public/js/os-list.js
-import { getOrdens, changeStatus } from './api.js';
 
-const container      = document.getElementById('os-container');
-const filtroStatus  = document.getElementById('filtroStatus');
-const modal          = document.getElementById('os-modal');
-const closeBtn       = document.getElementById('modal-close');
-const statusSelect   = document.getElementById('modal-status-select');
-const pagamentoLabel = document.getElementById('label-pagamento');
-const pagamentoSelect= document.getElementById('modal-pagamento-select');
-const finalizarBtn   = document.getElementById('modal-finalizar');
+import { getOrdens, changeStatus } from "./api.js";
+// Importa formatadores do util
+import { formatBRL, parseBRL } from "./utils/format.js";
+
+const container       = document.getElementById("os-container");
+const filtroStatus   = document.getElementById("filtroStatus");
+const modal           = document.getElementById("os-modal");
+const closeBtn        = document.getElementById("modal-close");
+const statusSelect    = document.getElementById("modal-status-select");
+const pagamentoLabel  = document.getElementById("label-pagamento");
+const pagamentoSelect = document.getElementById("modal-pagamento-select");
+const finalizarBtn    = document.getElementById("modal-finalizar");
 
 let ordens = [];
 let currentOs = null;
@@ -25,37 +28,37 @@ function renderCards() {
     : ordens;
 
   container.innerHTML = lista.map(o => {
-    // soma dos valores
+    // soma dos valores (itens)
     const total = o.itens.reduce((sum, i) => {
-      const v = typeof i.valorServico === 'number'
-        ? i.valorServico
-        : parseFloat(
-            i.valorServico.toString()
-              .replace(/\./g, '')
-              .replace(',', '.')
-          ) || 0;
-      return sum + v;
+      const raw = i.valorServico;
+      const valorNum = typeof raw === "number"
+        ? raw
+        : parseBRL(raw.toString());
+      return sum + valorNum;
     }, 0);
+
+    // Exibe cada item com valor em BRL
+    const itensHtml = o.itens.map(i => {
+      const raw = i.valorServico;
+      const valorNum = typeof raw === "number"
+        ? raw
+        : parseBRL(i.valorServico.toString());
+      return `<p>${i.servico.nome}: R$ ${formatBRL(valorNum)}</p>`;
+    }).join("");
 
     return `
       <div class="card">
         <h3>${o.placa} – ${o.modelo}</h3>
-        ${o.itens.map(i => {
-          const raw = i.valorServico;
-          const valor = (typeof raw === 'number')
-            ? raw.toFixed(2)
-            : raw;
-          return `<p>${i.servico.nome}: R$ ${valor}</p>`;
-        }).join('')}
+        ${itensHtml}
         <p><strong>Status:</strong> ${o.status}</p>
-        <p><strong>Total:</strong> R$ ${total.toFixed(2)}</p>
+        <p><strong>Total:</strong> R$ ${formatBRL(total)}</p>
         <button class="btn-status" data-id="${o.id}">Mudar Status</button>
       </div>
     `;
-  }).join('');
+  }).join("");
 
-  container.querySelectorAll('.btn-status').forEach(btn => {
-    btn.addEventListener('click', () => {
+  container.querySelectorAll(".btn-status").forEach(btn => {
+    btn.addEventListener("click", () => {
       const id = Number(btn.dataset.id);
       openModal(ordens.find(o => o.id === id));
     });
@@ -65,73 +68,76 @@ function renderCards() {
 function openModal(os) {
   currentOs = os;
 
-  document.getElementById('modal-servico-nome').textContent =
-    os.itens.map(i => i.servico.nome).join(', ');
-  document.getElementById('modal-carro-info').textContent =
+  const itensNomes = os.itens.map(i => i.servico.nome).join(", ");
+  const total = os.itens.reduce((sum, i) => {
+    const raw = i.valorServico;
+    const valorNum = typeof raw === "number"
+      ? raw
+      : parseBRL(raw.toString());
+    return sum + valorNum;
+  }, 0);
+
+  document.getElementById("modal-servico-nome").textContent = itensNomes;
+  document.getElementById("modal-carro-info").textContent =
     `${os.placa} (${os.modelo})`;
-  document.getElementById('modal-descricao').textContent =
-    os.itens.map(i => i.servico.descricao || '').join('; ');
-  document.getElementById('modal-valor').textContent = 
-    os.itens.reduce((sum, i) => {
-      const v = typeof i.valorServico === 'number'
-        ? i.valorServico
-        : parseFloat(i.valorServico.toString().replace(/\./g,'').replace(',', '.'))||0;
-      return sum + v;
-    }, 0).toFixed(2);
-  document.getElementById('modal-criado-em').textContent =
+  document.getElementById("modal-descricao").textContent =
+    os.itens.map(i => i.servico.descricao || "").join("; ");
+  document.getElementById("modal-valor").textContent =
+    formatBRL(total);
+  document.getElementById("modal-criado-em").textContent =
     new Date(os.criadoEm).toLocaleString();
 
   statusSelect.value      = os.status;
-  pagamentoSelect.value   = os.modalidadePagamento || 'PIX';
-  pagamentoLabel.style.display  = 'none';
-  pagamentoSelect.style.display = 'none';
+  pagamentoSelect.value   = os.modalidadePagamento || "PIX";
+  pagamentoLabel.style.display  = "none";
+  pagamentoSelect.style.display = "none";
   finalizarBtn.disabled        = true;
 
-  if (os.status === 'ENTREGUE') {
+  if (os.status === "ENTREGUE") {
     statusSelect.disabled     = true;
-    finalizarBtn.style.display = 'none';
+    finalizarBtn.style.display = "none";
   } else {
     statusSelect.disabled     = false;
-    finalizarBtn.style.display = 'inline-block';
+    finalizarBtn.style.display = "inline-block";
   }
 
-  modal.style.display = 'flex';
+  modal.style.display = "flex";
 }
 
-closeBtn.addEventListener('click', () => modal.style.display = 'none');
-modal.addEventListener('click', e => {
-  if (e.target === modal) modal.style.display = 'none';
+closeBtn.addEventListener("click", () => modal.style.display = "none");
+modal.addEventListener("click", e => {
+  if (e.target === modal) modal.style.display = "none";
 });
 
 // Quando muda status no modal
-statusSelect.addEventListener('change', () => {
+statusSelect.addEventListener("change", () => {
   const novo = statusSelect.value;
-  if (novo === 'ENTREGUE') {
-    pagamentoLabel.style.display  = 'block';
-    pagamentoSelect.style.display = 'block';
+  if (novo === "ENTREGUE") {
+    pagamentoLabel.style.display  = "block";
+    pagamentoSelect.style.display = "block";
     finalizarBtn.disabled          = false;
   } else {
     changeStatus(currentOs.id, novo, null)
       .then(() => {
-        modal.style.display = 'none';
+        modal.style.display = "none";
         load();
       })
-      .catch(err => alert('Erro: ' + err.message));
+      .catch(err => alert("Erro: " + err.message));
   }
 });
 
 // Quando clica em Finalizar
-finalizarBtn.addEventListener('click', () => {
+finalizarBtn.addEventListener("click", () => {
   const tipoPag = pagamentoSelect.value;
-  changeStatus(currentOs.id, 'ENTREGUE', tipoPag)
+  changeStatus(currentOs.id, "ENTREGUE", tipoPag)
     .then(() => {
-      modal.style.display = 'none';
+      modal.style.display = "none";
       load();
     })
-    .catch(err => alert('Erro: ' + err.message));
+    .catch(err => alert("Erro: " + err.message));
 });
 
 // Re-renderiza quando mudar filtro
-filtroStatus.addEventListener('change', renderCards);
+filtroStatus.addEventListener("change", renderCards);
 
-document.addEventListener('DOMContentLoaded', load);
+document.addEventListener("DOMContentLoaded", load);

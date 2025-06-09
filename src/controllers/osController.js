@@ -1,6 +1,6 @@
 import osService from "../services/osService.js";
 import prisma from "../prismaClient.js";
-import { formatBRL } from "../utils/format.js";
+import { formatBRL } from "../../public/js/utils/format.js";
 
 /**
  * GET /api/os
