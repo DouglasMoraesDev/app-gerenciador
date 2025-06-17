@@ -53,16 +53,15 @@ form.addEventListener("submit", async e => {
   }
 
   const descricao = form.descricao.value.trim();
-  const valorStr  = form.valor.value.trim();
+  const valor     = form.valor.valueAsNumber;  // <-- usa valueAsNumber em vez de parseBRL
   const data      = form.data.value;
 
-  if (!descricao || !valorStr || !data) {
+  if (!descricao || valor == null || !data) {
     return alert("Preencha todos os campos corretamente.");
   }
 
-  const valor = parseBRL(valorStr);
   if (isNaN(valor) || valor <= 0) {
-    return alert("Valor inválido. Use formato 1.234,56");
+    return alert("Valor inválido. Use um número maior que zero.");
   }
 
   try {
