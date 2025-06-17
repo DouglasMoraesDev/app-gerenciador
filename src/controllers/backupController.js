@@ -1,28 +1,28 @@
 // src/controllers/backupController.js
 
 import prisma from "../prismaClient.js";
-import path from "path";
 import fs from "fs/promises";
+import path from "path";
 
 /**
  * GET /api/backup
- * Exporta todos os dados do banco e gera um arquivo JavaScript para download.
- * O arquivo contém: module.exports = { clientes: [...], servicos: [...], ... }.
+ * Exporta todos os dados do banco em um JSON para download.
  */
-export async function exportBackup(req, res) {
+export async function exportBackup(req, res, next) {
   try {
     // 1) Buscar todos os registros de cada tabela
-    const clientes = await prisma.cliente.findMany();
-    const servicos = await prisma.servico.findMany();
-    const ordensServico = await prisma.ordemServico.findMany();
-    const usuarios = await prisma.usuario.findMany();
-    const caixa = await prisma.caixa.findMany();
-    const caixaMov = await prisma.caixaMov.findMany();
-    const gastos = await prisma.gasto.findMany();
+    const clientes          = await prisma.cliente.findMany();
+    const servicos          = await prisma.servico.findMany();
+    const ordensServico     = await prisma.ordemServico.findMany();
+    const usuarios          = await prisma.usuario.findMany();
+    const caixa             = await prisma.caixa.findMany();
+    const caixaMov          = await prisma.caixaMov.findMany();
+    const gastos            = await prisma.gasto.findMany();
     const empresasParceiras = await prisma.empresaParceira.findMany();
 
-    // 2) Montar um objeto contendo todas as coleções
-    const backupObj = {
+    // 2) Montar o objeto de backup
+    const backupData = {
+      geradoEm: new Date().toISOString(),
       clientes,
       servicos,
       ordensServico,
@@ -33,23 +33,20 @@ export async function exportBackup(req, res) {
       empresasParceiras
     };
 
-    // 3) Serializar em texto JS
-    const jsContent = 
-      "// Este arquivo é um backup completo dos dados do Lava-Rápido Manager\n" +
-      "module.exports = " +
-      JSON.stringify(backupObj, null, 2) +
-      ";\n";
+    // 3) Serializar como texto JSON
+    const jsonContent = JSON.stringify(backupData, null, 2);
 
-    // 4) Definir nome do arquivo de download
-    const agora = new Date();
-    const timestamp = `${agora.getFullYear()}${String(agora.getMonth()+1).padStart(2,"0")}${String(agora.getDate()).padStart(2,"0")}_` +
-                      `${String(agora.getHours()).padStart(2,"0")}${String(agora.getMinutes()).padStart(2,"0")}`;
-    const filename = `backup_${timestamp}.js`;
+    // 4) Definir nome do arquivo
+    const now = new Date();
+    const ts  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}_` +
+                `${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}`;
+    const filename = `backup_${ts}.json`;
 
     // 5) Enviar como anexo
-    res.setHeader("Content-Type", "application/javascript");
+    res.setHeader("Content-Type", "application/json");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-    return res.send(jsContent);
+    return res.send(jsonContent);
+
   } catch (err) {
     console.error("Erro em exportBackup:", err);
     return res.status(500).json({ error: "Erro interno ao gerar backup." });
@@ -58,31 +55,25 @@ export async function exportBackup(req, res) {
 
 /**
  * POST /api/backup/restore
- * Recebe um arquivo .js (módulo que exporta um objeto), faz eval
- * para resgatar os dados e re-popula o banco (apagando tudo antes).
+ * Recebe um arquivo JSON com o formato de exportBackup e re-popula o banco.
+ * Atenção: requer que você esteja usando o middleware multer para 'backupFile'.
  */
-export async function restoreBackup(req, res) {
+export async function restoreBackup(req, res, next) {
   try {
-    if (!req.file) {
+    if (!req.file || !req.file.path) {
       return res.status(400).json({ error: "Arquivo de backup não enviado." });
     }
 
-    // 1) Ler o conteúdo do arquivo enviado
-    const filePath = req.file.path; // caminho temporário onde multer salvou
-    const content = await fs.readFile(filePath, "utf-8");
-
-    // 2) Fazer eval do conteúdo ‒ deve conter `module.exports = { ... }`
-    //    Para segurança, envolvemos em função anônima.
-    let backupData;
+    const filePath = req.file.path;
+    const raw      = await fs.readFile(filePath, "utf-8");
+    let data;
     try {
-      const wrapper = `(function() { ${content} return module.exports; })()`;
-      backupData = eval(wrapper);
-    } catch (evalErr) {
-      console.error("Erro ao avaliar arquivo de backup:", evalErr);
-      return res.status(400).json({ error: "Arquivo de backup inválido ou corrompido." });
+      data = JSON.parse(raw);
+    } catch (parseErr) {
+      console.error("JSON inválido no backup:", parseErr);
+      return res.status(400).json({ error: "Formato de backup inválido." });
     }
 
-    // 3) Validar formato de backupData (deve conter as chaves usadas no export)
     const {
       clientes,
       servicos,
@@ -92,130 +83,59 @@ export async function restoreBackup(req, res) {
       caixaMov,
       gastos,
       empresasParceiras
-    } = backupData;
+    } = data;
 
+    // Validação mínima
     if (!clientes || !servicos || !ordensServico || !usuarios ||
-        !caixa || !caixaMov || !gastos || !empresasParceiras) {
-      return res.status(400).json({ error: "Formato de backup incompleto." });
+        !caixa    || !caixaMov   || !gastos        || !empresasParceiras) {
+      return res.status(400).json({ error: "Backup incompleto." });
     }
 
-    // 4) Limpar todas as tabelas (ordem inversa às dependências)
-    //    Atenção: ordensServico referencia clientes, servicos e empresasParceiras
-    //    caixaMov referencia ordensServico e gastos, etc.
-    await prisma.caixaMov.deleteMany({});
-    await prisma.caixa.deleteMany({});
-    await prisma.ordemServico.deleteMany({});
-    await prisma.gasto.deleteMany({});
-    await prisma.empresaParceira.deleteMany({});
-    await prisma.servico.deleteMany({});
-    await prisma.cliente.deleteMany({});
-    await prisma.usuario.deleteMany({});
+    // 1) Limpar tabelas (na ordem inversa às dependências)
+    await prisma.caixaMov.deleteMany();
+    await prisma.gasto.deleteMany();
+    await prisma.caixa.deleteMany();
+    await prisma.ordemServico.deleteMany();
+    await prisma.empresaParceira.deleteMany();
+    await prisma.servico.deleteMany();
+    await prisma.cliente.deleteMany();
+    await prisma.usuario.deleteMany();
 
-    // 5) Inserir novamente todos os registros, mantendo os IDs originais
-    //    Para manter IDs, usamos createMany({ data: ..., skipDuplicates: true })
-    //    Porém, createMany não garante inserção de ID custom. Então usamos create() em loop.
-
+    // 2) Restaurar registros (mantendo IDs originais)
     // Usuários
     for (const u of usuarios) {
-      const { id, nome, email, senha, papel, criadoEm, ...rest } = u;
-      await prisma.usuario.create({
-        data: { id, nome, email, senha, papel, criadoEm },
-      });
+      await prisma.usuario.create({ data: u });
     }
-
     // Clientes
     for (const c of clientes) {
-      const { id, nome, telefone, email: emailCli, veiculo, placa, criadoEm } = c;
-      await prisma.cliente.create({
-        data: { id, nome, telefone, email: emailCli, veiculo, placa, criadoEm },
-      });
+      await prisma.cliente.create({ data: c });
     }
-
     // Serviços
     for (const s of servicos) {
-      const { id, nome, descricao, valor, criadoEm } = s;
-      await prisma.servico.create({
-        data: { id, nome, descricao, valor, criadoEm },
-      });
+      await prisma.servico.create({ data: s });
     }
-
     // Empresas Parceiras
     for (const p of empresasParceiras) {
-      const { id, nome, cnpj, descricao: desc, valorMensal, contratoUrl, criadoEm } = p;
-      await prisma.empresaParceira.create({
-        data: { id, nome, cnpj, descricao: desc, valorMensal, contratoUrl, criadoEm },
-      });
+      await prisma.empresaParceira.create({ data: p });
     }
-
     // Ordens de Serviço
     for (const o of ordensServico) {
-      const {
-        id, clienteId, servicoId, descricaoServico, valorServico,
-        status, criadoEm, atualizadoEm, finalizadoPorId, modalidadePagamento,
-        movCaixaId, parceiroId
-      } = o;
-
-      await prisma.ordemServico.create({
-        data: {
-          id,
-          clienteId,
-          servicoId,
-          descricaoServico,
-          valorServico,
-          status,
-          criadoEm,
-          atualizadoEm,
-          finalizadoPorId,
-          modalidadePagamento,
-          movCaixaId,
-          parceiroId
-        }
-      });
+      await prisma.ordemServico.create({ data: o });
     }
-
     // Caixa
     for (const c of caixa) {
-      const { id, dataAbertura, dataFechamento, saldoInicial, saldoFinal, entradas, saidas, usuarioId } = c;
-      await prisma.caixa.create({
-        data: {
-          id,
-          dataAbertura,
-          dataFechamento,
-          saldoInicial,
-          saldoFinal,
-          entradas,
-          saidas,
-          usuarioId
-        }
-      });
+      await prisma.caixa.create({ data: c });
     }
-
-    // Gasto
+    // Gastos
     for (const g of gastos) {
-      const { id, categoria, descricao, valor, data, usuarioId, movCaixaId } = g;
-      await prisma.gasto.create({
-        data: { id, categoria, descricao, valor, data, usuarioId, movCaixaId }
-      });
+      await prisma.gasto.create({ data: g });
     }
-
-    // CaixaMov
+    // Movimentações de Caixa
     for (const m of caixaMov) {
-      const { id, tipo, valor, createdAt, usuarioId, caixaId, ordemId, gastoId } = m;
-      await prisma.caixaMov.create({
-        data: {
-          id,
-          tipo,
-          valor,
-          createdAt,
-          usuarioId,
-          caixaId,
-          ordemId,
-          gastoId
-        }
-      });
+      await prisma.caixaMov.create({ data: m });
     }
 
-    // 6) Remover o arquivo temporário de upload
+    // 3) Remover arquivo de upload
     await fs.unlink(filePath);
 
     return res.json({ message: "Backup restaurado com sucesso." });
