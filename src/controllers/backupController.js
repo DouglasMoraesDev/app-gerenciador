@@ -2,7 +2,6 @@
 
 import prisma from "../prismaClient.js";
 import fs from "fs/promises";
-import path from "path";
 
 /**
  * GET /api/backup
@@ -10,11 +9,11 @@ import path from "path";
  */
 export async function exportBackup(req, res, next) {
   try {
-    // 1) Buscar todos os registros de cada tabela
-    const clientes          = await prisma.cliente.findMany();
-    const servicos          = await prisma.servico.findMany();
-    const ordensServico     = await prisma.ordemServico.findMany();
+    // 1) Buscar todos os registros de cada tabela que existem no seu schema
     const usuarios          = await prisma.usuario.findMany();
+    const servicos          = await prisma.servico.findMany();
+    const itensOrdemServico  = await prisma.ordemServicoItem.findMany();
+    const ordensServico     = await prisma.ordemServico.findMany();
     const caixa             = await prisma.caixa.findMany();
     const caixaMov          = await prisma.caixaMov.findMany();
     const gastos            = await prisma.gasto.findMany();
@@ -23,10 +22,10 @@ export async function exportBackup(req, res, next) {
     // 2) Montar o objeto de backup
     const backupData = {
       geradoEm: new Date().toISOString(),
-      clientes,
-      servicos,
-      ordensServico,
       usuarios,
+      servicos,
+      itensOrdemServico,
+      ordensServico,
       caixa,
       caixaMov,
       gastos,
@@ -38,8 +37,8 @@ export async function exportBackup(req, res, next) {
 
     // 4) Definir nome do arquivo
     const now = new Date();
-    const ts  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}${String(now.getDate()).padStart(2,"0")}_` +
-                `${String(now.getHours()).padStart(2,"0")}${String(now.getMinutes()).padStart(2,"0")}`;
+    const ts  = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_` +
+                `${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
     const filename = `backup_${ts}.json`;
 
     // 5) Enviar como anexo
@@ -55,17 +54,17 @@ export async function exportBackup(req, res, next) {
 
 /**
  * POST /api/backup/restore
- * Recebe um arquivo JSON com o formato de exportBackup e re-popula o banco.
- * Atenção: requer que você esteja usando o middleware multer para 'backupFile'.
+ * Recebe um JSON no formato de exportBackup e re-popula o banco.
+ * Atenção: requer multer para 'backupFile'.
  */
 export async function restoreBackup(req, res, next) {
   try {
-    if (!req.file || !req.file.path) {
+    if (!req.file?.path) {
       return res.status(400).json({ error: "Arquivo de backup não enviado." });
     }
 
-    const filePath = req.file.path;
-    const raw      = await fs.readFile(filePath, "utf-8");
+    // 1) Ler e parsear o JSON
+    const raw = await fs.readFile(req.file.path, "utf-8");
     let data;
     try {
       data = JSON.parse(raw);
@@ -75,68 +74,44 @@ export async function restoreBackup(req, res, next) {
     }
 
     const {
-      clientes,
-      servicos,
-      ordensServico,
       usuarios,
+      servicos,
+      itensOrdemServico,
+      ordensServico,
       caixa,
       caixaMov,
       gastos,
       empresasParceiras
     } = data;
 
-    // Validação mínima
-    if (!clientes || !servicos || !ordensServico || !usuarios ||
-        !caixa    || !caixaMov   || !gastos        || !empresasParceiras) {
+    // 2) Validação mínima
+    if (!usuarios || !servicos || !itensOrdemServico || !ordensServico ||
+        !caixa    || !caixaMov   || !gastos             || !empresasParceiras) {
       return res.status(400).json({ error: "Backup incompleto." });
     }
 
-    // 1) Limpar tabelas (na ordem inversa às dependências)
+    // 3) Limpar tabelas (inverter ordem de dependência)
     await prisma.caixaMov.deleteMany();
     await prisma.gasto.deleteMany();
     await prisma.caixa.deleteMany();
     await prisma.ordemServico.deleteMany();
+    await prisma.ordemServicoItem.deleteMany();
     await prisma.empresaParceira.deleteMany();
     await prisma.servico.deleteMany();
-    await prisma.cliente.deleteMany();
     await prisma.usuario.deleteMany();
 
-    // 2) Restaurar registros (mantendo IDs originais)
-    // Usuários
-    for (const u of usuarios) {
-      await prisma.usuario.create({ data: u });
-    }
-    // Clientes
-    for (const c of clientes) {
-      await prisma.cliente.create({ data: c });
-    }
-    // Serviços
-    for (const s of servicos) {
-      await prisma.servico.create({ data: s });
-    }
-    // Empresas Parceiras
-    for (const p of empresasParceiras) {
-      await prisma.empresaParceira.create({ data: p });
-    }
-    // Ordens de Serviço
-    for (const o of ordensServico) {
-      await prisma.ordemServico.create({ data: o });
-    }
-    // Caixa
-    for (const c of caixa) {
-      await prisma.caixa.create({ data: c });
-    }
-    // Gastos
-    for (const g of gastos) {
-      await prisma.gasto.create({ data: g });
-    }
-    // Movimentações de Caixa
-    for (const m of caixaMov) {
-      await prisma.caixaMov.create({ data: m });
-    }
+    // 4) Restaurar registros (mantendo IDs originais)
+    for (const u of usuarios)           await prisma.usuario.create({ data: u });
+    for (const s of servicos)           await prisma.servico.create({ data: s });
+    for (const i of itensOrdemServico)  await prisma.ordemServicoItem.create({ data: i });
+    for (const o of ordensServico)      await prisma.ordemServico.create({ data: o });
+    for (const c of caixa)              await prisma.caixa.create({ data: c });
+    for (const g of gastos)             await prisma.gasto.create({ data: g });
+    for (const m of caixaMov)           await prisma.caixaMov.create({ data: m });
+    for (const p of empresasParceiras)  await prisma.empresaParceira.create({ data: p });
 
-    // 3) Remover arquivo de upload
-    await fs.unlink(filePath);
+    // 5) Apagar o arquivo temporário
+    await fs.unlink(req.file.path);
 
     return res.json({ message: "Backup restaurado com sucesso." });
   } catch (err) {
